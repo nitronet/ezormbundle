@@ -35,6 +35,7 @@ foreach ($results->searchHits as $searchHit) {
 
 eZORM Query:
 ```php
+use eZ\Publish\API\Repository\Values\Content\Query as eZQ;
 use Nitronet\eZORMBundle\ORM\Query;
 
 $query = new Query();
