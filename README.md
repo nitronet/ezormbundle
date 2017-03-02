@@ -10,10 +10,10 @@ The main purpose is to ease the Symfony Developer's life by providing classic Sy
 
 Obviously this added abstraction layer isn't designed for performance. eZ, like any other Symfony application, requires proper HTTP caching and a decent environment configuration to perform at its best. We still consider performance as a key feature but we are aware that this ORM-thing will not perform as fast as raw eZ API usage, and you should be aware of this too. 
 
-Also, the API is SQL-oriented for ease of use and fast learning curve. However, the Content model of eZ Platform isn't SQL and thus implies some limitations or differences:
+This bundle is just a handy toolkit when building Forms, querying the API and manage ContentTypes. The API is SQL-oriented for ease of use and fast learning curve but the Content model of eZ Platform isn't SQL which leads to some limitations or differences:
 
 * A Content (sql: row) can have different values with the same ID (versions, translations)
-* A ContentType can be considered like a SQL table when doing a SELECT but writes are sometimes requiring a Location or a special state (drafts)
+* A ContentType can be considered like a SQL table when doing a SELECT but writes are sometime requiring a Location (INSERT) and/or a special state (UPDATE)
 * "Persistence" is a lie (but no one really cares)
 
 
@@ -53,5 +53,5 @@ $query->select()
     ->orderBy(new eZQ\SortClause\DateModified())
 ;
 
-$articles = $this->get('ezorm.connection')->execute($query, Query::FETCH_CONTENT, $lang = null);
+$articles = $this->get('ezorm.connection')->execute($query, $fetchType = Query::FETCH_CONTENT, $lang = null);
 ```
