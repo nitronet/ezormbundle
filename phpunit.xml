@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<phpunit colors="true" bootstrap="Tests/bootstrap.php"  convertNoticesToExceptions="false" convertWarningsToExceptions="false">
+
+    <php>
+        <server name="SYMFONY_ENV" value="test" />
+        <server name="SYMFONY_DEBUG" value="false" />
+    </php>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./</directory>
+            <exclude>
+                <directory>./Resources</directory>
+                <directory>./Tests</directory>
+                <directory>./vendor</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+
+    <testsuites>
+        <testsuite name="eZORM Bundle Test Suite">
+            <directory>./Tests/</directory>
+        </testsuite>
+    </testsuites>
+
+</phpunit>

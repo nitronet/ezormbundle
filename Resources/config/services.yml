@@ -1,0 +1,65 @@
+parameters:
+    ezorm.fields_manager.class: Nitronet\eZORMBundle\ORM\Manager\FieldsManager
+    ezorm.table.content.class: Nitronet\eZORMBundle\ORM\Table\ContentTable
+    ezorm.table.content_types.class: Nitronet\eZORMBundle\ORM\Table\ContentTypeTable
+    ezorm.field_helper.text.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\TextFieldHelper
+    ezorm.field_helper.user.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\UserFieldHelper
+    ezorm.field_helper.image.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\ImageFieldHelper
+    ezorm.field_helper.author.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\AuthorFieldHelper
+    ezorm.field_helper.richtext.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\RichTextFieldHelper
+    ezorm.field_helper.boolean.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\BoolFieldHelper
+
+services:
+    ezorm.fields_manager:
+        class: "%ezorm.fields_manager.class%"
+        arguments:
+            - "@service_container"
+
+    ezorm.table.content:
+        class: "%ezorm.table.content.class%"
+        tags:
+            - { name: ezorm.table, alias: "ez:content" }
+        shared: false
+
+    ezorm.table.content_type:
+        class: "%ezorm.table.content_types.class%"
+        tags:
+            - { name: ezorm.table, alias: "ez:content_type" }
+        shared: false
+
+    ezorm.field_helper.ezstring:
+        class: "%ezorm.field_helper.text.class%"
+        tags:
+            - { name: ezorm.field_helper, type: "ezstring" }
+
+    ezorm.field_helper.ezuser:
+        class: "%ezorm.field_helper.user.class%"
+        tags:
+            - { name: ezorm.field_helper, type: "ezuser" }
+
+    ezorm.field_helper.eztext:
+        class: "%ezorm.field_helper.text.class%"
+        tags:
+            - { name: ezorm.field_helper, type: "eztext" }
+
+    ezorm.field_helper.ezimage:
+        class: "%ezorm.field_helper.image.class%"
+        tags:
+            - { name: ezorm.field_helper, type: "ezimage" }
+
+    ezorm.field_helper.ezauthor:
+        class: "%ezorm.field_helper.author.class%"
+        tags:
+            - { name: ezorm.field_helper, type: "ezauthor" }
+
+    ezorm.field_helper.ezrichtext:
+        class: "%ezorm.field_helper.richtext.class%"
+        arguments:
+            - "@ezpublish.fieldType.ezrichtext.converter.output.xhtml5"
+        tags:
+            - { name: ezorm.field_helper, type: "ezrichtext" }
+
+    ezorm.field_helper.ezboolean:
+        class: "%ezorm.field_helper.boolean.class%"
+        tags:
+            - { name: ezorm.field_helper, type: "ezboolean" }
