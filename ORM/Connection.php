@@ -15,8 +15,8 @@ use Nitronet\eZORMBundle\ORM\Events\AfterQueryEvent;
 use Nitronet\eZORMBundle\ORM\Events\BeforeQueryEvent;
 use Nitronet\eZORMBundle\ORM\Exception\QueryHandlerException;
 use Nitronet\eZORMBundle\ORM\Manager\EntityManager;
-use Nitronet\eZORMBundle\ORM\Manager\SchemasManager;
 use Nitronet\eZORMBundle\ORM\Manager\TablesManager;
+use Nitronet\eZORMBundle\ORM\Schema\SchemasManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 

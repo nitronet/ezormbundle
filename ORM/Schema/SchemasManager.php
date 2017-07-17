@@ -7,7 +7,7 @@
  * @since Jan 2017
  * @version 1.0
  */
-namespace Nitronet\eZORMBundle\ORM\Manager;
+namespace Nitronet\eZORMBundle\ORM\Schema;
 
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use Nitronet\eZORMBundle\eZORMBundle;
@@ -15,7 +15,6 @@ use Nitronet\eZORMBundle\ORM\Connection;
 use Nitronet\eZORMBundle\ORM\Exception\ORMException;
 use Nitronet\eZORMBundle\ORM\Query;
 use Nitronet\eZORMBundle\ORM\Schema\Builder\ContentTypeSchemaBuilder;
-use Nitronet\eZORMBundle\ORM\Schema\Schema;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
