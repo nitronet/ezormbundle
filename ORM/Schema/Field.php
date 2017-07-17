@@ -68,6 +68,29 @@ class Field
     protected $defaultValue;
 
     /**
+     * @var array
+     */
+    protected $ormSettings = array();
+
+    /**
+     * Field constructor.
+     * @param string $type
+     * @param bool $searchable
+     * @param bool $required
+     * @param string $fieldGroup
+     */
+    public function __construct($type, $searchable, $required, $fieldGroup, $infoCollector, $position)
+    {
+        $this->searchable = $searchable;
+        $this->required = $required;
+        $this->type = $type;
+        $this->fieldGroup = $fieldGroup;
+        $this->infoCollector = $infoCollector;
+        $this->position = $position;
+    }
+
+
+    /**
      * @return FieldHelperInterface
      */
     public function getFieldHelper()
@@ -241,5 +264,21 @@ class Field
     public function setDescription($description)
     {
         $this->description = $description;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOrmSettings()
+    {
+        return $this->ormSettings;
+    }
+
+    /**
+     * @param array $ormSettings
+     */
+    public function setOrmSettings(array $ormSettings)
+    {
+        $this->ormSettings = $ormSettings;
     }
 }

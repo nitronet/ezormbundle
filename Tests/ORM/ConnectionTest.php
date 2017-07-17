@@ -23,9 +23,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
         $this->connection = new Connection(
             $factory->repositoryFactory(),
-            new TablesManager($container),
-            new SchemasManager($container),
-            new EntityManager($container)
+            $container
         );
     }
 

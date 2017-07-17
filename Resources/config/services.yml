@@ -8,6 +8,7 @@ parameters:
     ezorm.field_helper.author.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\AuthorFieldHelper
     ezorm.field_helper.richtext.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\RichTextFieldHelper
     ezorm.field_helper.boolean.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\BoolFieldHelper
+    ezorm.field_helper.binary.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\BinaryFileFieldHelper
 
 services:
     ezorm.fields_manager:
@@ -63,3 +64,8 @@ services:
         class: "%ezorm.field_helper.boolean.class%"
         tags:
             - { name: ezorm.field_helper, type: "ezboolean" }
+
+    ezorm.field_helper.binary:
+        class: "%ezorm.field_helper.binary.class%"
+        tags:
+            - { name: ezorm.field_helper, type: "ezbinaryfile" }

@@ -12,7 +12,6 @@ namespace Nitronet\eZORMBundle\ORM\QueryHandler\FetchType;
 
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchResult;
-use eZ\Publish\API\Repository\Values\Content\Field as eZField;
 use Nitronet\eZORMBundle\ORM\Connection;
 use Nitronet\eZORMBundle\ORM\Exception\ORMException;
 use Nitronet\eZORMBundle\ORM\QueryHandler\FetchTypeInterface;
@@ -63,7 +62,7 @@ class ORMFetchType implements FetchTypeInterface
 
             $content        = $searchHit->valueObject;
             $matchedLang    = $searchHit->matchedTranslation;
-            $schema         = $sm ->loadSchemaByContentTypeId($content->contentInfo->contentTypeId, $this->connection);
+            $schema         = $sm ->loadSchemaByContentTypeId($content->contentInfo->contentTypeId);
 
             $entity         = $em->entityFactory($schema->getEntityClass());
             $results[]      = $this->populate($entity, $content, $schema, $language, $matchedLang);
@@ -103,7 +102,7 @@ class ORMFetchType implements FetchTypeInterface
                 $content->getFieldValue($name, $defaultLang)
             );
 
-            $value = $field->getFieldHelper()->toEntityValue($baseValue, $this->connection);
+            $value = $field->getFieldHelper()->toEntityValue($baseValue, $this->connection, $field);
             if ($entity instanceof \stdClass) {
                 $entity->{$name} = $value;
             } else {

@@ -12,6 +12,7 @@ namespace Nitronet\eZORMBundle\ORM\Schema\FieldHelper;
 
 use eZ\Publish\Core\FieldType\RichText\Value;
 use Nitronet\eZORMBundle\ORM\Connection;
+use Nitronet\eZORMBundle\ORM\Schema\Field;
 use Nitronet\eZORMBundle\ORM\Schema\FieldHelperInterface;
 use eZ\Publish\Core\FieldType\RichText\Converter as RichTextConverterInterface;
 
@@ -34,10 +35,11 @@ class RichTextFieldHelper implements FieldHelperInterface
     /**
      * @param mixed $value
      * @param Connection $connection
+     * @param Field $field
      *
      * @return mixed
      */
-    public function toEntityValue($value, Connection $connection)
+    public function toEntityValue($value, Connection $connection, Field $field)
     {
         if ($value instanceof Value) {
             return trim($this->converter->convert($value->xml)->saveHTML());
@@ -53,6 +55,14 @@ class RichTextFieldHelper implements FieldHelperInterface
     public function toEzValue($value, Connection $connection)
     {
         return new Value($value);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultORMSettings()
+    {
+        return array();
     }
 }
 

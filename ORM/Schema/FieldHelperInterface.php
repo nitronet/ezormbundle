@@ -17,10 +17,11 @@ interface FieldHelperInterface
     /**
      * @param mixed $value
      * @param Connection $connection
+     * @param Field $field
      *
      * @return mixed
      */
-    public function toEntityValue($value, Connection $connection);
+    public function toEntityValue($value, Connection $connection, Field $field);
 
     /**
      * @param mixed $value
@@ -29,4 +30,9 @@ interface FieldHelperInterface
      * @return mixed
      */
     public function toEzValue($value, Connection $connection);
+
+    /**
+     * @return array
+     */
+    public function getDefaultORMSettings();
 }

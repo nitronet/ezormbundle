@@ -11,14 +11,16 @@ namespace Nitronet\eZORMBundle\ORM;
 
 
 use eZ\Publish\API\Repository\Repository;
+use Nitronet\eZORMBundle\ORM\Events\AfterQueryEvent;
+use Nitronet\eZORMBundle\ORM\Events\BeforeQueryEvent;
 use Nitronet\eZORMBundle\ORM\Exception\QueryHandlerException;
 use Nitronet\eZORMBundle\ORM\Manager\EntityManager;
-use Nitronet\eZORMBundle\ORM\Manager\FieldsManager;
 use Nitronet\eZORMBundle\ORM\Manager\SchemasManager;
 use Nitronet\eZORMBundle\ORM\Manager\TablesManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class Connection
+class Connection extends EventDispatcher
 {
     /**
      * @var Repository
@@ -47,18 +49,15 @@ class Connection
 
     /**
      * Connection constructor.
+     *
      * @param Repository $repository
-     * @param TablesManager $tablesManager
-     * @param SchemasManager $schemasManager
-     * @param EntityManager $entityManager
+     * @param ContainerInterface $container
      */
-    public function __construct(Repository $repository, TablesManager $tablesManager, SchemasManager $schemasManager,
-        EntityManager $entityManager
-    ) {
+    public function __construct(Repository $repository, ContainerInterface $container) {
         $this->repository       = $repository;
-        $this->tablesManager    = $tablesManager;
-        $this->schemasManager   = $schemasManager;
-        $this->entityManager    = $entityManager;
+        $this->tablesManager    = new TablesManager($container);
+        $this->schemasManager   = new SchemasManager($container, $this);
+        $this->entityManager    = new EntityManager($container);
         $this->defaultLanguageCode = $repository->getContentLanguageService()->getDefaultLanguageCode();
     }
 
@@ -74,6 +73,11 @@ class Connection
      */
     public function execute(Query $query, $fetchType = null, $language = null)
     {
+        $event = $this->dispatch(ConnectionEvents::BEFORE_QUERY, new BeforeQueryEvent($this, $query));
+        if ($event->isPropagationStopped()) {
+            return $event->getQueryResult();
+        }
+
         $table      = $this->tablesManager->findForQuery($query);
         $handler    = $table->getQueryHandler($this);
         if (null === $fetchType) {
@@ -92,7 +96,14 @@ class Connection
             }
         }
 
-        return $handler->handle($query, $fetchType, $language);
+        $result = $handler->handle($query, $fetchType, $language);
+
+        $event = $this->dispatch(ConnectionEvents::AFTER_QUERY, new AfterQueryEvent($this, $query, $result));
+        if ($event->isPropagationStopped()) {
+            return $event->getQueryResult();
+        }
+
+        return $result;
     }
 
     /**

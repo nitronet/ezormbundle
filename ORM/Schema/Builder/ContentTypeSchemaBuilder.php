@@ -70,14 +70,16 @@ class ContentTypeSchemaBuilder
     {
         $mainLangCode   = $this->contentType->mainLanguageCode;
         $helper         = $this->fieldsManager->loadFieldHelper($fieldDefinition->fieldTypeIdentifier);
-        $field          = new Field();
+        $field          = new Field(
+            $fieldDefinition->fieldTypeIdentifier,
+            $fieldDefinition->isSearchable,
+            $fieldDefinition->isRequired,
+            $fieldDefinition->fieldGroup,
+            $fieldDefinition->isInfoCollector,
+            $fieldDefinition->position
+        );
 
-        $field->setFieldGroup($fieldDefinition->fieldGroup);
-        $field->setInfoCollector($fieldDefinition->isInfoCollector);
-        $field->setSearchable($fieldDefinition->isSearchable);
-        $field->setPosition($fieldDefinition->position);
         $field->setSettings($fieldDefinition->getFieldSettings());
-        $field->setType($fieldDefinition->fieldTypeIdentifier);
 
         $descs = $fieldDefinition->getDescriptions();
         // eZ Bugfix: Warning: array_key_exists() expects parameter 2 to be array, boolean given
@@ -86,7 +88,8 @@ class ContentTypeSchemaBuilder
         }
         $field->setRequired($fieldDefinition->isRequired);
         $field->setFieldHelper($helper);
-        $field->setDefaultValue($helper->toEntityValue($fieldDefinition->defaultValue, $this->connection));
+        $field->setDefaultValue($helper->toEntityValue($fieldDefinition->defaultValue, $this->connection, $field));
+        $field->setOrmSettings($helper->getDefaultORMSettings());
 
         return $field;
     }

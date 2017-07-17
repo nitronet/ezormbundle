@@ -32,39 +32,42 @@ class SchemasManager implements ContainerAwareInterface
      */
     protected $schemasByIdentifier = array();
 
-
     /**
      * @var ContainerInterface
      */
     protected $container;
 
     /**
+     * @var Connection
+     */
+    protected $connection;
+
+    /**
      * SchemasManager constructor.
      *
-     * @param Connection $connection
      * @param ContainerInterface $container
+     * @param Connection $connection
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, Connection $connection)
     {
         $this->container  = $container;
+        $this->connection = $connection;
     }
 
     /**
      * @param integer $id
-     * @param Connection $connection
      *
      * @return SchemaInterface
      */
-    public function loadSchemaByContentTypeId($id, Connection $connection)
+    public function loadSchemaByContentTypeId($id)
     {
         if (!array_key_exists($id, $this->schemasById)) {
             $query          = Query::factory()->select()->from(eZORMBundle::CONTENTTYPE_TABLE_ALIAS)->text($id);
-            $results        = $connection->execute($query);
+            $results        = $this->connection->execute($query);
             $contentType    = $results[$id];
             $schema         = $this->loadSchema($contentType);
 
-            $this->schemasById[$id] = $schema;
-            $this->schemasByIdentifier[$contentType->identifier] = $schema;
+            $this->schemasById[$id] = $this->schemasByIdentifier[$contentType->identifier] = $schema;
         }
 
         return $this->schemasById[$id];
