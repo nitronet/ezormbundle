@@ -78,15 +78,18 @@ class Field
      * @param bool $searchable
      * @param bool $required
      * @param string $fieldGroup
+     * @param $infoCollector
+     * @param $position
      */
-    public function __construct($type, $searchable, $required, $fieldGroup, $infoCollector, $position)
-    {
-        $this->searchable = $searchable;
-        $this->required = $required;
+    public function __construct($type, $searchable = true, $required = false, $fieldGroup = null,
+        $infoCollector = false, $position = 0
+    ) {
+        $this->searchable = (bool)$searchable;
+        $this->required = (bool)$required;
         $this->type = $type;
         $this->fieldGroup = $fieldGroup;
-        $this->infoCollector = $infoCollector;
-        $this->position = $position;
+        $this->infoCollector = (bool)$infoCollector;
+        $this->position = (int)$position;
     }
 
 

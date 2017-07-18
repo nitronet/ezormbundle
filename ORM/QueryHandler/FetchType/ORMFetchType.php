@@ -12,10 +12,12 @@ namespace Nitronet\eZORMBundle\ORM\QueryHandler\FetchType;
 
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchResult;
+use eZ\Publish\SPI\Persistence\Content\ContentInfo;
 use Nitronet\eZORMBundle\ORM\Connection;
 use Nitronet\eZORMBundle\ORM\Exception\ORMException;
 use Nitronet\eZORMBundle\ORM\QueryHandler\FetchTypeInterface;
 use Nitronet\eZORMBundle\ORM\Schema\Field;
+use Nitronet\eZORMBundle\ORM\Schema\MetaFieldInterface;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
@@ -80,8 +82,9 @@ class ORMFetchType implements FetchTypeInterface
      *
      * @return object
      */
-    protected function populate($entity, Content $content, SchemaInterface $schema, $lang, $defaultLang)
-    {
+    protected function populate($entity, Content $content, SchemaInterface $schema,
+        $lang, $defaultLang
+    ) {
         /** @var PropertyAccessor $pa */
         $pa = PropertyAccess::createPropertyAccessorBuilder()
             ->enableMagicCall()
@@ -103,6 +106,18 @@ class ORMFetchType implements FetchTypeInterface
             );
 
             $value = $field->getFieldHelper()->toEntityValue($baseValue, $this->connection, $field);
+            if ($entity instanceof \stdClass) {
+                $entity->{$name} = $value;
+            } else {
+                $pa->setValue($entity, $name, $value);
+            }
+        }
+
+        $metaFields = $schema->getMetaFields();
+        foreach ($metaFields as $name => $metaField) {
+            /** @var MetaFieldInterface $metaField */
+
+            $value = $metaField->toEntityValue($entity, $content, $metaField);
             if ($entity instanceof \stdClass) {
                 $entity->{$name} = $value;
             } else {

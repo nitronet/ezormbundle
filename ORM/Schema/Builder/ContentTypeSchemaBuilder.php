@@ -15,6 +15,13 @@ use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use Nitronet\eZORMBundle\ORM\Connection;
 use Nitronet\eZORMBundle\ORM\Manager\FieldsManager;
 use Nitronet\eZORMBundle\ORM\Schema\Field;
+use Nitronet\eZORMBundle\ORM\Schema\MetaField\ContentId;
+use Nitronet\eZORMBundle\ORM\Schema\MetaField\MainLocationId;
+use Nitronet\eZORMBundle\ORM\Schema\MetaField\ModificationDate;
+use Nitronet\eZORMBundle\ORM\Schema\MetaField\PublishedDate;
+use Nitronet\eZORMBundle\ORM\Schema\MetaField\RemoteId;
+use Nitronet\eZORMBundle\ORM\Schema\MetaField\SectionId;
+use Nitronet\eZORMBundle\ORM\Schema\MetaField\Version;
 use Nitronet\eZORMBundle\ORM\Schema\Schema;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
 
@@ -57,6 +64,15 @@ class ContentTypeSchemaBuilder
         foreach ($this->contentType->getFieldDefinitions() as $fieldDefinition) {
             $schema->addField($fieldDefinition->identifier, $this->buildFieldFromDefinition($fieldDefinition));
         }
+
+        // add basic metaFields
+        $schema->addMetaField(ContentId::DEFAULT_ATTR_NAME, new ContentId());
+        $schema->addMetaField(MainLocationId::DEFAULT_ATTR_NAME, new MainLocationId());
+        $schema->addMetaField(Version::DEFAULT_ATTR_NAME, new Version());
+        $schema->addMetaField(PublishedDate::DEFAULT_ATTR_NAME, new PublishedDate());
+        $schema->addMetaField(ModificationDate::DEFAULT_ATTR_NAME, new ModificationDate());
+        $schema->addMetaField(RemoteId::DEFAULT_ATTR_NAME, new RemoteId());
+        $schema->addMetaField(SectionId::DEFAULT_ATTR_NAME, new SectionId());
 
         return $schema;
     }

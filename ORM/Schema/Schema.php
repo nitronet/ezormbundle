@@ -21,6 +21,11 @@ class Schema implements SchemaInterface
     protected $fields = array();
 
     /**
+     * @var MetaFieldInterface[]
+     */
+    protected $metaFields = array();
+
+    /**
      * @var string|null
      */
     protected $entityClass;
@@ -31,6 +36,14 @@ class Schema implements SchemaInterface
     public function getFields()
     {
         return $this->fields;
+    }
+
+    /**
+     * @return MetaFieldInterface[]
+     */
+    public function getMetaFields()
+    {
+        return $this->metaFields;
     }
 
     /**
@@ -68,6 +81,44 @@ class Schema implements SchemaInterface
     public function hasField($attribute)
     {
         return array_key_exists($attribute, $this->fields);
+    }
+
+
+    /**
+     * @param string $attribute
+     * @param MetaFieldInterface $metaField
+     *
+     * @return Schema
+     */
+    public function addMetaField($attribute, MetaFieldInterface $metaField)
+    {
+        $this->metaFields[$attribute] = $metaField;
+
+        return $this;
+    }
+
+    /**
+     * @param string $attribute
+     *
+     * @return MetaFieldInterface
+     * @throws ORMException if the metaField is not registered
+     */
+    public function getMetaField($attribute)
+    {
+        if (!array_key_exists($attribute, $this->metaFields)) {
+            throw ORMException::unknownMetaFieldFactory($attribute);
+        }
+
+        return $this->metaFields[$attribute];
+    }
+
+    /**
+     * @param string $attribute
+     * @return bool
+     */
+    public function hasMetaField($attribute)
+    {
+        return array_key_exists($attribute, $this->metaFields);
     }
 
     /**

@@ -2,7 +2,9 @@
 namespace Nitronet\eZORMBundle\ORM\Exception;
 
 use Nitronet\eZORMBundle\Exception;
+use Nitronet\eZORMBundle\ORM\Schema\Field;
 use Nitronet\eZORMBundle\ORM\Schema\FieldHelperInterface;
+use Nitronet\eZORMBundle\ORM\Schema\MetaFieldInterface;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
 
 class ORMException extends Exception
@@ -76,4 +78,29 @@ class ORMException extends Exception
     {
         return new self(sprintf('Unregistered Field: %s', $fieldName));
     }
+
+    /**
+     * This exception is thrown when a trying to access an unregistered metaField
+     *
+     * @param string $fieldName
+     *
+     * @return ORMException
+     */
+    public static function unknownMetaFieldFactory($fieldName)
+    {
+        return new self(sprintf('Unregistered MetaField: %s', $fieldName));
+    }
+
+    /**
+     * This exception is thrown when using a Field instead of a MetaField
+     *
+     * @param Field $field
+     *
+     * @return ORMException
+     */
+    public static function unsuoportedFieldShouldBeMeta(Field $field)
+    {
+        return new self(sprintf('Expected "%s", got Field (%s)', MetaFieldInterface::class, get_class($field)));
+    }
+
 }
