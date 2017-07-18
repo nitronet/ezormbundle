@@ -28,7 +28,7 @@ class ImageFieldHelper implements FieldHelperInterface
     public function toEntityValue($value, Connection $connection, Field $field)
     {
         if ($value instanceof Value) {
-            return $value->uri;
+            return $value;
         }
     }
 
@@ -40,7 +40,13 @@ class ImageFieldHelper implements FieldHelperInterface
      */
     public function toEzValue($value, Connection $connection)
     {
-        return new Value($value);
+        if (is_string($value)) {
+            $value = new Value(array('uri' => $value));
+        } elseif (is_array($value)) {
+            $value = new Value($value);
+        }
+
+        return $value;
     }
 
     /**
