@@ -30,6 +30,11 @@ class ORMFetchType implements FetchTypeInterface
     protected $connection;
 
     /**
+     * @var PropertyAccessor
+     */
+    protected static $accessor;
+
+    /**
      * ORMFetchType constructor.
      * @param Connection $connection
      */
@@ -74,6 +79,21 @@ class ORMFetchType implements FetchTypeInterface
     }
 
     /**
+     * @return PropertyAccessor
+     */
+    protected static function getAccessor()
+    {
+        if (!isset(static::$accessor)) {
+            static::$accessor = PropertyAccess::createPropertyAccessorBuilder()
+                ->enableMagicCall()
+                ->getPropertyAccessor()
+            ;
+        }
+
+        return static::$accessor;
+    }
+
+    /**
      * @param object  $entity
      * @param Content $content
      * @param SchemaInterface $schema
@@ -86,10 +106,7 @@ class ORMFetchType implements FetchTypeInterface
         $lang, $defaultLang
     ) {
         /** @var PropertyAccessor $pa */
-        $pa = PropertyAccess::createPropertyAccessorBuilder()
-            ->enableMagicCall()
-            ->getPropertyAccessor()
-        ;
+        $pa = self::getAccessor();
 
         $fields = $schema->getFields();
 
