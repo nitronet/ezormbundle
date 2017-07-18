@@ -281,4 +281,9 @@ class Field
     {
         $this->ormSettings = $ormSettings;
     }
+
+    public function getOrmSetting($name, $default = false)
+    {
+        return array_key_exists($name, $this->ormSettings) ? $this->ormSettings[$name] : $default;
+    }
 }

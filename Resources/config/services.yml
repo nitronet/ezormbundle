@@ -9,6 +9,7 @@ parameters:
     ezorm.field_helper.richtext.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\RichTextFieldHelper
     ezorm.field_helper.boolean.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\BoolFieldHelper
     ezorm.field_helper.binary.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\BinaryFileFieldHelper
+    ezorm.field_helper.relation.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\RelationFieldHelper
 
 services:
     ezorm.fields_manager:
@@ -69,3 +70,8 @@ services:
         class: "%ezorm.field_helper.binary.class%"
         tags:
             - { name: ezorm.field_helper, type: "ezbinaryfile" }
+
+    ezorm.field_helper.relation:
+        class: "%ezorm.field_helper.relation.class%"
+        tags:
+            - { name: ezorm.field_helper, type: "ezobjectrelation" }
