@@ -75,3 +75,9 @@ services:
         class: "%ezorm.field_helper.relation.class%"
         tags:
             - { name: ezorm.field_helper, type: "ezobjectrelation" }
+
+# Bundle
+    ezorm.cache.compilation:
+        class: Doctrine\Common\Cache\FilesystemCache
+        arguments:
+            - "%kernel.cache_dir%/ezorm"

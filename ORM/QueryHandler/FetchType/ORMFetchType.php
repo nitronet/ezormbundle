@@ -12,7 +12,6 @@ namespace Nitronet\eZORMBundle\ORM\QueryHandler\FetchType;
 
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchResult;
-use eZ\Publish\SPI\Persistence\Content\ContentInfo;
 use Nitronet\eZORMBundle\ORM\Connection;
 use Nitronet\eZORMBundle\ORM\Exception\ORMException;
 use Nitronet\eZORMBundle\ORM\QueryHandler\FetchTypeInterface;

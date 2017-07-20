@@ -16,6 +16,7 @@ use Nitronet\eZORMBundle\ORM\Connection;
 use Nitronet\eZORMBundle\ORM\Manager\FieldsManager;
 use Nitronet\eZORMBundle\ORM\Schema\Field;
 use Nitronet\eZORMBundle\ORM\Schema\MetaField\ContentId;
+use Nitronet\eZORMBundle\ORM\Schema\MetaField\MainLanguageCode;
 use Nitronet\eZORMBundle\ORM\Schema\MetaField\MainLocationId;
 use Nitronet\eZORMBundle\ORM\Schema\MetaField\ModificationDate;
 use Nitronet\eZORMBundle\ORM\Schema\MetaField\PublishedDate;
@@ -60,7 +61,13 @@ class ContentTypeSchemaBuilder
      */
     public function build()
     {
-        $schema         = new Schema();
+        $schema         = new Schema($this->contentType->identifier);
+
+        $schema->setContentTypeDescription($this->contentType->getDescription($this->contentType->mainLanguageCode));
+        $schema->setContentTypeIsContainer((bool)$this->contentType->isContainer);
+        $schema->setContentTypeMainLanguageCode($this->contentType->mainLanguageCode);
+        $schema->setContentTypeUrlAliasSchema($this->contentType->urlAliasSchema);
+
         foreach ($this->contentType->getFieldDefinitions() as $fieldDefinition) {
             $schema->addField($fieldDefinition->identifier, $this->buildFieldFromDefinition($fieldDefinition));
         }
@@ -73,6 +80,7 @@ class ContentTypeSchemaBuilder
         $schema->addMetaField(ModificationDate::DEFAULT_ATTR_NAME, new ModificationDate());
         $schema->addMetaField(RemoteId::DEFAULT_ATTR_NAME, new RemoteId());
         $schema->addMetaField(SectionId::DEFAULT_ATTR_NAME, new SectionId());
+        $schema->addMetaField(MainLanguageCode::DEFAULT_ATTR_NAME, new MainLanguageCode());
 
         return $schema;
     }

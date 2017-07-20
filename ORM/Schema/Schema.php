@@ -31,6 +31,28 @@ class Schema implements SchemaInterface
     protected $entityClass;
 
     /**
+     * @var string
+     */
+    protected $contentTypeIdentifier;
+
+    protected $contentTypeDescription;
+
+    protected $contentTypeIsContainer;
+
+    protected $contentTypeUrlAliasSchema;
+
+    protected $contentTypeMainLanguageCode;
+
+    /**
+     * Schema constructor.
+     * @param string $contentTypeIdentifier
+     */
+    public function __construct($contentTypeIdentifier)
+    {
+        $this->contentTypeIdentifier = $contentTypeIdentifier;
+    }
+
+    /**
      * @return Field[]
      */
     public function getFields()
@@ -135,5 +157,85 @@ class Schema implements SchemaInterface
     public function setEntityClass($entityClass)
     {
         $this->entityClass = $entityClass;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContentTypeIdentifier()
+    {
+        return $this->contentTypeIdentifier;
+    }
+
+    /**
+     * @param string $contentTypeIdentifier
+     */
+    public function setContentTypeIdentifier($contentTypeIdentifier)
+    {
+        $this->contentTypeIdentifier = $contentTypeIdentifier;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContentTypeDescription()
+    {
+        return $this->contentTypeDescription;
+    }
+
+    /**
+     * @param mixed $contentTypeDescription
+     */
+    public function setContentTypeDescription($contentTypeDescription)
+    {
+        $this->contentTypeDescription = $contentTypeDescription;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContentTypeIsContainer()
+    {
+        return $this->contentTypeIsContainer;
+    }
+
+    /**
+     * @param mixed $contentTypeIsContainer
+     */
+    public function setContentTypeIsContainer($contentTypeIsContainer)
+    {
+        $this->contentTypeIsContainer = $contentTypeIsContainer;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContentTypeUrlAliasSchema()
+    {
+        return $this->contentTypeUrlAliasSchema;
+    }
+
+    /**
+     * @param mixed $contentTypeUrlAliasSchema
+     */
+    public function setContentTypeUrlAliasSchema($contentTypeUrlAliasSchema)
+    {
+        $this->contentTypeUrlAliasSchema = $contentTypeUrlAliasSchema;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContentTypeMainLanguageCode()
+    {
+        return $this->contentTypeMainLanguageCode;
+    }
+
+    /**
+     * @param mixed $contentTypeMainLanguageCode
+     */
+    public function setContentTypeMainLanguageCode($contentTypeMainLanguageCode)
+    {
+        $this->contentTypeMainLanguageCode = $contentTypeMainLanguageCode;
     }
 }
