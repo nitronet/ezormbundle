@@ -86,3 +86,31 @@ services:
     ezorm.metafield.content_id:
         class: Nitronet\eZORMBundle\ORM\Schema\MetaField\ContentId
         shared: false
+
+    ezorm.metafield.published_date:
+        class: Nitronet\eZORMBundle\ORM\Schema\MetaField\PublishedDate
+        shared: false
+
+    ezorm.metafield.main_location_id:
+        class: Nitronet\eZORMBundle\ORM\Schema\MetaField\MainLocationId
+        shared: false
+
+    ezorm.metafield.main_language_code:
+        class: Nitronet\eZORMBundle\ORM\Schema\MetaField\MainLanguageCode
+        shared: false
+
+    ezorm.metafield.modification_date:
+        class: Nitronet\eZORMBundle\ORM\Schema\MetaField\ModificationDate
+        shared: false
+
+    ezorm.metafield.remote_id:
+        class: Nitronet\eZORMBundle\ORM\Schema\MetaField\RemoteId
+        shared: false
+
+    ezorm.metafield.section_id:
+        class: Nitronet\eZORMBundle\ORM\Schema\MetaField\SectionId
+        shared: false
+
+    ezorm.metafield.version:
+        class: Nitronet\eZORMBundle\ORM\Schema\MetaField\Version
+        shared: false
