@@ -5,14 +5,18 @@ use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Cache\FilesystemCache;
 use Nitronet\eZORMBundle\ORM\Connection;
+use Nitronet\eZORMBundle\ORM\Exception\ORMException;
 use Nitronet\eZORMBundle\ORM\Manager\FieldsManager;
 use Nitronet\eZORMBundle\ORM\Mapping\ContentType;
 use Nitronet\eZORMBundle\ORM\Mapping\Entity;
 use Nitronet\eZORMBundle\ORM\Mapping\Field;
+use Nitronet\eZORMBundle\ORM\Mapping\MetaField;
+use Nitronet\eZORMBundle\ORM\Schema\MetaFieldInterface;
 use Nitronet\eZORMBundle\ORM\Schema\Schema;
 use Nitronet\eZORMBundle\ORM\Schema\SchemaBuilderInterface;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
 use Nitronet\eZORMBundle\ORM\Schema\Field as SchemaField;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class AnnotationsSchemaBuilder implements SchemaBuilderInterface
 {
@@ -27,15 +31,22 @@ class AnnotationsSchemaBuilder implements SchemaBuilderInterface
     protected $fieldsManager;
 
     /**
+     * @var ContainerInterface
+     */
+    protected $container;
+
+    /**
      * AnnotationsSchemaBuilder constructor.
      *
      * @param $className
      * @param FieldsManager $fieldsManager
+     * @param ContainerInterface $container
      */
-    public function __construct($className, FieldsManager $fieldsManager)
+    public function __construct($className, FieldsManager $fieldsManager, ContainerInterface $container)
     {
         $this->className = $className;
         $this->fieldsManager = $fieldsManager;
+        $this->container = $container;
     }
 
     /**
@@ -77,6 +88,7 @@ class AnnotationsSchemaBuilder implements SchemaBuilderInterface
             foreach ($propertyAnnotations as $annotation) {
                 if ($annotation instanceof Field) {
                     $field = new SchemaField(
+                        $annotation->identifier,
                         $annotation->type,
                         $annotation->searchable,
                         $annotation->required,
@@ -93,6 +105,8 @@ class AnnotationsSchemaBuilder implements SchemaBuilderInterface
                     $field->setFieldHelper($this->fieldsManager->loadFieldHelper($annotation->type));
 
                     $schema->addField($propertyName, $field);
+                } elseif ($annotation instanceof MetaField) {
+                    $this->handleMetaFieldAnnotation($annotation, $schema, $propertyName);
                 }
             }
         }
@@ -102,4 +116,40 @@ class AnnotationsSchemaBuilder implements SchemaBuilderInterface
     }
 
 
+    /**
+     * @param MetaField $metaField
+     * @param Schema $schema
+     * @param $propertyName
+     *
+     * @throws ORMException when invalid service id
+     */
+    protected function handleMetaFieldAnnotation(MetaField $metaField, Schema $schema, $propertyName)
+    {
+        if (false === $this->container->has($metaField->service)) {
+            throw ORMException::mappingExceptionFactory(
+                $schema->getEntityClass(),
+                $propertyName,
+                sprintf("Invalid MetaField service '%s': Service not found", $metaField->service)
+            );
+        }
+
+        $metaFieldInstance = $this->container->get($metaField->service);
+        if (!$metaFieldInstance instanceof MetaFieldInterface) {
+            throw ORMException::mappingExceptionFactory(
+                $schema->getEntityClass(),
+                $propertyName,
+                sprintf("Invalid MetaField service '%s': '%s' is not an instance of %s",
+                    $metaField->service,
+                    get_class($metaFieldInstance),
+                    MetaFieldInterface::class
+                )
+            );
+        }
+
+        if (count($metaField->ormSettings)) {
+            $metaFieldInstance->setOrmSettings($metaField->ormSettings);
+        }
+
+        $schema->addMetaField($propertyName, $metaFieldInstance);
+    }
 }

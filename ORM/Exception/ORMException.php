@@ -98,9 +98,18 @@ class ORMException extends Exception
      *
      * @return ORMException
      */
-    public static function unsuoportedFieldShouldBeMeta(Field $field)
+    public static function unsupportedFieldShouldBeMeta(Field $field)
     {
         return new self(sprintf('Expected "%s", got Field (%s)', MetaFieldInterface::class, get_class($field)));
     }
 
+    /**
+     * Mapping exception
+     *
+     * @return ORMException
+     */
+    public static function mappingExceptionFactory($className, $property, $problem)
+    {
+        return new self(sprintf('Invalid mapping "%s::%s": %s', $className, $property, $problem));
+    }
 }

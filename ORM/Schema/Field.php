@@ -13,6 +13,11 @@ namespace Nitronet\eZORMBundle\ORM\Schema;
 class Field
 {
     /**
+     * @var string
+     */
+    protected $identifier;
+
+    /**
      * @var FieldHelperInterface
      */
     protected $fieldHelper;
@@ -74,16 +79,18 @@ class Field
 
     /**
      * Field constructor.
+     * @param $identifier
      * @param string $type
      * @param bool $searchable
      * @param bool $required
      * @param string $fieldGroup
-     * @param $infoCollector
-     * @param $position
+     * @param bool $infoCollector
+     * @param int $position
      */
-    public function __construct($type, $searchable = true, $required = false, $fieldGroup = null,
+    public function __construct($identifier, $type, $searchable = true, $required = false, $fieldGroup = null,
         $infoCollector = false, $position = 0
     ) {
+        $this->identifier = $identifier;
         $this->searchable = (bool)$searchable;
         $this->required = (bool)$required;
         $this->type = $type;
@@ -107,6 +114,22 @@ class Field
     public function setFieldHelper($fieldHelper)
     {
         $this->fieldHelper = $fieldHelper;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @param string $identifier
+     */
+    public function setIdentifier($identifier)
+    {
+        $this->identifier = $identifier;
     }
 
     /**
@@ -282,7 +305,7 @@ class Field
      */
     public function setOrmSettings(array $ormSettings)
     {
-        $this->ormSettings = $ormSettings;
+        $this->ormSettings = array_merge($this->ormSettings, $ormSettings);
     }
 
     public function getOrmSetting($name, $default = false)

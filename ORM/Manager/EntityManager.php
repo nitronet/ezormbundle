@@ -43,6 +43,8 @@ class EntityManager implements ContainerAwareInterface
         if (empty($entityClass)) {
             return new \stdClass();
         }
+
+        return new $entityClass;
     }
 
     public function persist($entity)

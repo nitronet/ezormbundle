@@ -95,6 +95,7 @@ class ContentTypeSchemaBuilder
         $mainLangCode   = $this->contentType->mainLanguageCode;
         $helper         = $this->fieldsManager->loadFieldHelper($fieldDefinition->fieldTypeIdentifier);
         $field          = new Field(
+            $fieldDefinition->identifier,
             $fieldDefinition->fieldTypeIdentifier,
             $fieldDefinition->isSearchable,
             $fieldDefinition->isRequired,

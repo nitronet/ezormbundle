@@ -29,7 +29,7 @@ class RelationFieldHelper implements FieldHelperInterface
     public function toEntityValue($value, Connection $connection, Field $field)
     {
         if ($value instanceof Value && null !== $value->destinationContentId) {
-            if (true === $field->getOrmSetting('eager')) {
+            if (true === $field->getOrmSetting('eager', true)) {
                 $query = new Query();
                 $query->select()->where(new eZQ\Criterion\ContentId($value->destinationContentId))->limit(1);
                 $results = $connection->execute($query);

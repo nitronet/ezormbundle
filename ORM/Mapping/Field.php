@@ -14,8 +14,22 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 class Field
 {
+    /**
+     * @Annotation\Required()
+     * @var string
+     */
     public $name;
 
+    /**
+     * @Annotation\Required()
+     * @var string
+     */
+    public $identifier;
+
+    /**
+     * @Annotation\Required()
+     * @var string
+     */
     public $type;
 
     public $group = null;

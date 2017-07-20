@@ -81,3 +81,8 @@ services:
         class: Doctrine\Common\Cache\FilesystemCache
         arguments:
             - "%kernel.cache_dir%/ezorm"
+
+# MetaFields
+    ezorm.metafield.content_id:
+        class: Nitronet\eZORMBundle\ORM\Schema\MetaField\ContentId
+        shared: false

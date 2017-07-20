@@ -3,13 +3,31 @@ namespace Nitronet\eZORMBundle\ORM\Schema;
 
 
 
-class AbstractMetaField extends Field
+class AbstractMetaField
 {
     /**
-     * AbstractMetaField constructor.
+     * @var array
      */
-    public function __construct()
+    protected $ormSettings = array();
+
+    /**
+     * @return array
+     */
+    public function getOrmSettings()
     {
-        parent::__construct('ezorm:meta', false, false);
+        return $this->ormSettings;
+    }
+
+    /**
+     * @param array $ormSettings
+     */
+    public function setOrmSettings(array $ormSettings)
+    {
+        $this->ormSettings = array_merge($this->ormSettings, $ormSettings);
+    }
+
+    public function getOrmSetting($name, $default = false)
+    {
+        return array_key_exists($name, $this->ormSettings) ? $this->ormSettings[$name] : $default;
     }
 }
