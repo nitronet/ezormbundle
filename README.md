@@ -55,3 +55,145 @@ $query->select()
 
 $articles = $this->get('ezorm.connection')->execute($query, $fetchType = Query::FETCH_CONTENT, $lang = null);
 ```
+
+## ORM Magic
+
+The above example will return ```stdClass``` instances.
+To return custom entities ("Content Types") we just have to map them just like we commonly do with Doctrine.
+
+```php
+namespace Acme\ExampleBundle\Entity;
+
+
+/**
+ * Article
+ * eZ's "article" content-type
+ *
+ * @eZORM\Entity()
+ * @eZORM\ContentType(
+ *     identifier="article",
+ *     mainLanguageCode="eng-GB",
+ *     urlAlias="<short_title|title>",
+ *     container=true,
+ *     description="Blog Article"
+ * )
+ */
+class Article
+{
+    /**
+     * @eZORM\Field(
+     *     name="Title",
+     *     identifier="title",
+     *     type="ezstring",
+     *     description="Title of article",
+     *     container=false,
+     *     translatable=true,
+     *     searchable=true,
+     *     position=1,
+     *     settings={"maxLength": 0}
+     * )
+     * @var string
+     */
+    public $title;
+
+    /**
+     * @eZORM\Field(
+     *     name="short_title",
+     *     identifier="short_title",
+     *     type="ezstring",
+     *     description="Short title of article",
+     *     container=false,
+     *     translatable=true,
+     *     searchable=true,
+     *     position=2,
+     *     settings={"maxLength": 255}
+     * )
+     * @var string
+     */
+    public $shortTitle;
+
+    /**
+     * @eZORM\Field(
+     *     name="author",
+     *     identifier="author",
+     *     type="ezauthor",
+     *     description="Title of article",
+     *     container=false,
+     *     translatable=true,
+     *     searchable=true,
+     *     position=3,
+     *     settings={"maxLength": 0}
+     * )
+     * @var string
+     */
+    public $author;
+
+    /**
+     * @eZORM\Field(
+     *     name="intro",
+     *     identifier="intro",
+     *     type="ezrichtext",
+     *     description="Intro of article",
+     *     container=false,
+     *     translatable=true,
+     *     searchable=true,
+     *     position=4
+     * )
+     * @var string
+     */
+    public $intro;
+
+    /**
+     * @eZORM\Field(
+     *     name="body",
+     *     identifier="body",
+     *     type="ezrichtext",
+     *     description="Body of article",
+     *     container=false,
+     *     translatable=true,
+     *     searchable=true,
+     *     position=5
+     * )
+     * @var string
+     */
+    public $body;
+
+    /**
+     * @eZORM\Field(
+     *     name="image",
+     *     identifier="image",
+     *     type="ezobjectrelation",
+     *     description="Image of article",
+     *     container=false,
+     *     translatable=true,
+     *     searchable=true,
+     *     position=6
+     * )
+     * @var string
+     */
+    public $image = null;
+
+    /**
+     * @eZORM\Field(
+     *     name="enable comments",
+     *     identifier="enable_comments",
+     *     type="ezboolean",
+     *     description="Enable commentse",
+     *     container=false,
+     *     translatable=false,
+     *     searchable=true,
+     *     position=7
+     * )
+     * @var string
+     */
+    public $enableComments = false;
+
+    /**
+     * @eZORM\MetaField(service="ezorm.metafield.content_id")
+     * @var int
+     */
+    public $_contentId;
+}
+```
+
+Tada! Our previous example will now return ``Àrticle`` instances.
