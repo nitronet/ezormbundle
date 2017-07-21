@@ -53,7 +53,7 @@ $query->select()
     ->orderBy(new eZQ\SortClause\DateModified())
 ;
 
-$articles = $this->get('ezorm.connection')->execute($query, $fetchType = Query::FETCH_CONTENT, $lang = null);
+$articles = $this->get('ezorm.connection')->execute($query);
 ```
 
 ## ORM Magic
@@ -62,7 +62,10 @@ The above example will return ```stdClass``` instances.
 To return custom entities ("Content Types") we just have to map them just like we commonly do with Doctrine.
 
 ```php
+<?php
 namespace Acme\ExampleBundle\Entity;
+
+use Nitronet\eZORMBundle\ORM\Mapping as eZORM;
 
 
 /**
