@@ -26,18 +26,11 @@ class Registry implements \Countable, \IteratorAggregate
     protected $store;
 
     /**
-     * @var SchemasManager
-     */
-    protected $schemasManager;
-
-    /**
      * Registry Constructor
-     * @param SchemasManager $schemasManager
      */
-    public function __construct(SchemasManager $schemasManager)
+    public function __construct()
     {
         $this->store            = new SplObjectStorage();
-        $this->schemasManager   = $schemasManager;
     }
 
     /**

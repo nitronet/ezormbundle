@@ -13,7 +13,6 @@ namespace Nitronet\eZORMBundle\ORM\Manager;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\Location;
 use Nitronet\eZORMBundle\ORM\Connection;
-use Nitronet\eZORMBundle\ORM\Registry\Entry;
 use Nitronet\eZORMBundle\ORM\Registry\Registry;
 use Nitronet\eZORMBundle\ORM\Registry\RegistryState;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
@@ -69,7 +68,12 @@ class EntityManager
             }
         }
 
-        $entityClass = $schema->getEntityClass();
+        if ($schema instanceof SchemaInterface) {
+            $entityClass = (!empty($schema->getEntityClass()) ?  $schema->getEntityClass() : '\stdClass');
+        } else {
+            $entityClass = '\stdClass';
+        }
+
         $entry = false;
         if ($contentInfo instanceof ContentInfo) {
             $entry = $this->registry->getEntryByContentInfo($contentInfo, $entityClass, $language);
