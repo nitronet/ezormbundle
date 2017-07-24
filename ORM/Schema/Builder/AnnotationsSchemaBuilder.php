@@ -1,10 +1,7 @@
 <?php
 namespace Nitronet\eZORMBundle\ORM\Schema\Builder;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Cache\FilesystemCache;
-use Nitronet\eZORMBundle\ORM\Connection;
 use Nitronet\eZORMBundle\ORM\Exception\ORMException;
 use Nitronet\eZORMBundle\ORM\Manager\FieldsManager;
 use Nitronet\eZORMBundle\ORM\Mapping\ContentType;

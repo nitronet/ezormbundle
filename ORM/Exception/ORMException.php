@@ -112,4 +112,24 @@ class ORMException extends Exception
     {
         return new self(sprintf('Invalid mapping "%s::%s": %s', $className, $property, $problem));
     }
+
+    /**
+     * @param string $className
+     *
+     * @return ORMException
+     */
+    public static function schemaByEntityNotFound($className)
+    {
+        return new self(sprintf('No Schema found for class "%s"', $className));
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return ORMException
+     */
+    public static function schemaByContentTypeIdNotFoundExceptionFactory($id)
+    {
+        return new self(sprintf('No Schema found for Content-Type identifier ID: "%s"', $id));
+    }
 }

@@ -54,11 +54,11 @@ class Connection extends EventDispatcher
      * @param ContainerInterface $container
      */
     public function __construct(Repository $repository, ContainerInterface $container) {
-        $this->repository       = $repository;
-        $this->tablesManager    = new TablesManager($container);
-        $this->schemasManager   = new SchemasManager($container, $this);
-        $this->entityManager    = new EntityManager($container);
-        $this->defaultLanguageCode = $repository->getContentLanguageService()->getDefaultLanguageCode();
+        $this->repository           = $repository;
+        $this->tablesManager        = new TablesManager($container);
+        $this->schemasManager       = new SchemasManager($container, $this);
+        $this->entityManager        = new EntityManager($this);
+        $this->defaultLanguageCode  = $repository->getContentLanguageService()->getDefaultLanguageCode();
     }
 
     /**
@@ -150,5 +150,21 @@ class Connection extends EventDispatcher
     public function getEntityManager()
     {
         return $this->entityManager;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultLanguageCode()
+    {
+        return $this->defaultLanguageCode;
+    }
+
+    /**
+     * @param string $defaultLanguageCode
+     */
+    public function setDefaultLanguageCode($defaultLanguageCode)
+    {
+        $this->defaultLanguageCode = $defaultLanguageCode;
     }
 }

@@ -10,64 +10,113 @@
 namespace Nitronet\eZORMBundle\ORM\Manager;
 
 
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use eZ\Publish\API\Repository\Values\Content\ContentInfo;
+use eZ\Publish\API\Repository\Values\Content\Location;
+use Nitronet\eZORMBundle\ORM\Connection;
+use Nitronet\eZORMBundle\ORM\Registry\Entry;
+use Nitronet\eZORMBundle\ORM\Registry\Registry;
+use Nitronet\eZORMBundle\ORM\Registry\RegistryState;
+use Nitronet\eZORMBundle\ORM\SchemaInterface;
+use Nitronet\eZORMBundle\ORM\WorkerInterface;
 
-class EntityManager implements ContainerAwareInterface
+class EntityManager
 {
     /**
-     * @var ContainerInterface
+     * @var Connection
      */
-    protected $container;
+    protected $connection;
 
+    /**
+     * @var
+     */
     protected $registry;
 
     /**
-     * SchemasManager constructor.
-     *
-     * @param ContainerInterface $container
+     * @var \SplQueue
      */
-    public function __construct(ContainerInterface $container)
+    protected $workersQueue;
+
+    /**
+     * SchemasManager constructor.
+     * @param Connection $connection
+     */
+    public function __construct(Connection $connection)
     {
-        $this->container  = $container;
+        $this->connection   = $connection;
+        $this->registry     = new Registry($connection->getSchemasManager());
+        $this->workersQueue = new \SplQueue();
     }
 
     /**
      *
-     * @param string|null $entityClass
+     * @param ContentInfo|null $contentInfo
+     * @param SchemaInterface|null $schema
+     * @param null|string $language
      *
      * @return object
      */
-    public function entityFactory($entityClass)
-    {
-        if (empty($entityClass)) {
-            return new \stdClass();
+    public function entityFactory(ContentInfo $contentInfo = null, SchemaInterface $schema = null,
+        $language = null
+    ) {
+        if (empty($language)) {
+            $language = $this->connection->getDefaultLanguageCode();
         }
 
-        return new $entityClass;
-    }
+        if (null === $schema) {
+            if ($contentInfo instanceof ContentInfo) {
+                $schema = $this->connection->getSchemasManager()
+                    ->loadSchemaByContentTypeId($contentInfo->contentTypeId);
+            }
+        }
 
-    public function persist($entity)
-    {
+        $entityClass = $schema->getEntityClass();
+        $entry = false;
+        if ($contentInfo instanceof ContentInfo) {
+            $entry = $this->registry->getEntryByContentInfo($contentInfo, $entityClass, $language);
+        }
 
-    }
+        if (false === $entry) {
+            $entry = $this->registry->store(
+                new $entityClass,
+                $contentInfo,
+                $schema,
+                RegistryState::REGISTERED,
+                $language
+            );
+        }
 
-    public function remove($entity)
-    {
-
+        return $entry->getObject();
     }
 
     /**
-     * Defines the Dependency Injection Container
-     *
-     * @param ContainerInterface|null $container
-     *
-     * @return EntityManager
+     * @param object $entity
+     * @param Location|Location[]|int|int[]|null $location
+     * @param null|string $language
+     * @param bool $draft
+     * @param bool $visible
      */
-    public function setContainer(ContainerInterface $container = null)
+    public function persist($entity, $location, $language = null, $draft = false, $visible = true)
     {
-        $this->container = $container;
+    }
 
-        return $this;
+    /**
+     * @param object $entity
+     * @param Location|Location[]|int|int[]|null $location
+     */
+    public function remove($entity, $location = null)
+    {
+    }
+
+    /**
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        foreach ($this->workersQueue as $worker) {
+            if ($worker instanceof WorkerInterface) {
+                $worker->execute($this->connection);
+            }
+        }
     }
 }

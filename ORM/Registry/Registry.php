@@ -10,14 +10,14 @@
 namespace Nitronet\eZORMBundle\ORM\Registry;
 
 
+use eZ\Publish\API\Repository\Values\Content\ContentInfo;
+use Nitronet\eZORMBundle\ORM\Schema\SchemasManager;
+use Nitronet\eZORMBundle\ORM\SchemaInterface;
 use \SplObjectStorage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class Registry implements \Countable, \IteratorAggregate
 {
-    const ACTION_SAVE           = 'save';
-    const ACTION_DELETE         = 'delete';
-
     /**
      * Storage handler
      *
@@ -26,16 +26,18 @@ class Registry implements \Countable, \IteratorAggregate
     protected $store;
 
     /**
-     * @var integer
+     * @var SchemasManager
      */
-    protected $_priority    = \PHP_INT_MAX;
+    protected $schemasManager;
 
     /**
      * Registry Constructor
+     * @param SchemasManager $schemasManager
      */
-    public function __construct()
+    public function __construct(SchemasManager $schemasManager)
     {
-        $this->store        = new SplObjectStorage();
+        $this->store            = new SplObjectStorage();
+        $this->schemasManager   = $schemasManager;
     }
 
     /**
@@ -73,38 +75,24 @@ class Registry implements \Countable, \IteratorAggregate
      * Stores an object into registry
      *
      * @param mixed $object
-     * @param array $identifiers
+     * @param ContentInfo $contentInfo
+     * @param SchemaInterface|null $schema
      * @param int $state
+     * @param null $language
      * @param array $data
      *
      * @return Entry
      */
-    public function store($object, array $identifiers = array(), $state = RegistryState::UNKNOWN, array $data = array())
-    {
+    public function store($object, ContentInfo $contentInfo = null, SchemaInterface $schema = null,
+        $state = RegistryState::UNKNOWN, $language = null, array $data = array()
+    ) {
         if ($this->has($object)) {
             return $this->getEntry($object);
         }
 
-        $entry = Entry::factory($object, $identifiers, $state, $data);
-//        $dispatcher = $entry->data('dispatcher', new Dispatcher());
-        $listeners  = $entry->data('listeners', array());
-
+        $entry = Entry::factory($object, $contentInfo, $schema, $state, $language, $data);
         if ($object instanceof EventSubscriberInterface) {
-//            foreach ($object->getListeners() as $key => $listener) {
-//                if (is_object($listener) && !is_callable($listener)) {
-//                    $dispatcher->addListener($listener);
-//                } elseif (is_callable($listener)) {
-//                    $dispatcher->on($key, $listener);
-//                }
-//            }
-        }
-
-        foreach ($listeners as $key => $listener) {
-//            if (is_object($listener) && !is_callable($listener)) {
-//                $dispatcher->addListener($listener);
-//            } elseif (is_callable($listener)) {
-//                $dispatcher->on($key, $listener);
-//            }
+            $entry->addSubscriber($object);
         }
 
         $this->store->attach($entry);
@@ -113,16 +101,17 @@ class Registry implements \Countable, \IteratorAggregate
     }
 
     /**
-     * @param array $identifiers
+     * @param ContentInfo $contentInfo
      * @param string $className
-     * 
-     * @return Entry|false
+     * @param null|string $language
+     *
+     * @return false|Entry
      */
-    protected function getEntryByIdentifiers(array $identifiers, $className = null)
+    public function getEntryByContentInfo(ContentInfo $contentInfo, $className = null, $language = null)
     {
         foreach ($this->store as $entry) {
             /** @var Entry $entry */
-            if ($entry->match($identifiers, $className)) {
+            if ($entry->match($contentInfo, $className, $language)) {
                 return $entry;
             }
         }
@@ -165,11 +154,10 @@ class Registry implements \Countable, \IteratorAggregate
      *
      * @return Registry
      */
-    public function clear()
+    public function free()
     {
         unset($this->store);
         $this->store        = new SplObjectStorage();
-        $this->_priority    = \PHP_INT_MAX;
 
         return $this;
     }

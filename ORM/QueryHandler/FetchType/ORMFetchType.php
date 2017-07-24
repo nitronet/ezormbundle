@@ -70,7 +70,7 @@ class ORMFetchType implements FetchTypeInterface
             $matchedLang    = $searchHit->matchedTranslation;
             $schema         = $sm ->loadSchemaByContentTypeId($content->contentInfo->contentTypeId);
 
-            $entity         = $em->entityFactory($schema->getEntityClass());
+            $entity         = $em->entityFactory($content->contentInfo, $schema, $matchedLang);
             $results[]      = $this->populate($entity, $content, $schema, $language, $matchedLang);
         }
 

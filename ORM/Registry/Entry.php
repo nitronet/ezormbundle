@@ -10,17 +10,23 @@
 namespace Nitronet\eZORMBundle\ORM\Registry;
 
 use \ArrayAccess;
+use eZ\Publish\API\Repository\Values\Content\ContentInfo;
+use Nitronet\eZORMBundle\ORM\SchemaInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  */
-class Entry implements ArrayAccess
+class Entry extends EventDispatcher implements ArrayAccess
 {
     /**
-     * Object identifiers keys
-     *
-     * @var array
+     * @var ContentInfo|null
      */
-    protected $identifiers = array();
+    protected $contentInfo = null;
+
+    /**
+     * @var null|SchemaInterface
+     */
+    protected $schema = null;
 
     /**
      * Registry state of the object
@@ -47,25 +53,6 @@ class Entry implements ArrayAccess
     protected $stateTs = null;
 
     /**
-     * @var integer
-     */
-    protected $actionTs = null;
-
-    /**
-     * The action to happend (if any)
-     *
-     * @var string
-     */
-    protected $action = null;
-
-    /**
-     * Action priority
-     *
-     * @var integer
-     */
-    protected $actionPriority;
-
-    /**
      * The stored object
      *
      * @var mixed
@@ -80,6 +67,11 @@ class Entry implements ArrayAccess
     protected $className;
 
     /**
+     * @var string
+     */
+    protected $language;
+
+    /**
      * Extra data associated with the stored object
      *
      * @var array
@@ -90,29 +82,28 @@ class Entry implements ArrayAccess
      * Constructor
      *
      * @param object $object
-     * @param array $ids
-     * @param int   $state
+     * @param ContentInfo $contentInfo
+     * @param SchemaInterface|null $schema
+     * @param int $state
      * @param array $data
      *
-     * @throws \InvalidArgumentException if $object is not an object
+     * @internal param array $ids
      */
-    public function __construct($object, array $ids = array(), $state = RegistryState::UNKNOWN, array $data = array())
+    public function __construct($object, ContentInfo $contentInfo = null, SchemaInterface $schema = null, $state = RegistryState::UNKNOWN, $language = null, array $data = array())
     {
         if (!is_object($object)) {
             throw new \InvalidArgumentException('value is not an object');
         }
 
-        ksort($ids);
-        if (!count($ids)) {
-            $ids = array('%hash%' => Accessor::factory($object)->hashCode());
-        }
 
         $this->object       =& $object;
-        $this->identifiers  = $ids;
+        $this->contentInfo  = $contentInfo;
+        $this->schema       = $schema;
+        $this->language     = $language;
         $this->storeTs      = time();
         $this->state        = $state;
         $this->stateTs      = time();
-        $this->className    = ltrim(get_class($object), '\\');
+        $this->className    = get_class($object);
         $this->data         = $data;
 
         if ($this->isState(RegistryState::FRESH)) {
@@ -191,8 +182,9 @@ class Entry implements ArrayAccess
      */
     public function fresh()
     {
-        $accessor               = new Accessor($this->object);
-        $this->initialValues    = $accessor->toArray(array($accessor, 'everythingAsArrayModifier'));
+          // TODO Change this
+//        $accessor               = new Accessor($this->object);
+//        $this->initialValues    = $accessor->toArray(array($accessor, 'everythingAsArrayModifier'));
 
         $this->setState(RegistryState::FRESH);
 
@@ -202,20 +194,17 @@ class Entry implements ArrayAccess
     /**
      * Test this Entry against identifiers and className
      *
-     * @param array $identifiers
+     * @param ContentInfo $contentInfo
      * @param string $className
+     * @param null|string $language
      *
-     * @return boolean
+     * @return bool
      */
-    public function match(array $identifiers, $className = null)
+    public function match(ContentInfo $contentInfo, $className = null, $language = null)
     {
-        ksort($identifiers);
-
-        if ($identifiers === $this->identifiers) {
-            if (null !== $className && $this->className == ltrim($className, '\\')) {
-                return true;
-            } elseif (null === $className) {
-                return true;
+        if ($this->contentInfo instanceof ContentInfo && $contentInfo->id === $this->contentInfo->id) {
+            if (null === $className || (null !== $className && $this->className === $className)) {
+                return ($language === $this->language);
             }
             return false;
         }
@@ -250,9 +239,11 @@ class Entry implements ArrayAccess
             return false;
         }
 
-        $accessor   = new Accessor($this->object);
-        $values     = $accessor->toArray(array($accessor, 'everythingAsArrayModifier'));
-        $diff       = array_diff_assoc($this->initialValues, $values);
+//        $accessor   = new Accessor($this->object);
+//        $values     = $accessor->toArray(array($accessor, 'everythingAsArrayModifier'));
+//        $diff       = array_diff_assoc($this->initialValues, $values);
+        // TODO Change this
+        $diff = array();
 
         if (!count($diff)) {
             return false;
@@ -270,8 +261,10 @@ class Entry implements ArrayAccess
      */
     public function getChangedValues()
     {
-        $accessor   = new Accessor($this->object);
-        $values     = $accessor->toArray(array($accessor, 'everythingAsArrayModifier'));
+//        $accessor   = new Accessor($this->object);
+//        $values     = $accessor->toArray(array($accessor, 'everythingAsArrayModifier'));
+        // TODO Change this
+        $values = array();
 
         $diff       = array();
         foreach ($values as $key => $val) {
@@ -285,51 +278,6 @@ class Entry implements ArrayAccess
         }
 
         return $diff;
-    }
-
-    /**
-     * Tells if an action is defined
-     *
-     * @return boolean
-     */
-    public function hasAction()
-    {
-        return !empty($this->action);
-    }
-
-    /**
-     * Defines an action
-     *
-     * @param string $action
-     *
-     * @return Entry
-     */
-    public function setAction($action, $priority)
-    {
-        $this->action           = $action;
-        $this->actionTs         = time();
-        $this->actionPriority   = $priority;
-
-        return $this;
-    }
-
-    /**
-     * Returns the defined action if any, or null
-     *
-     * @return string|null
-     */
-    public function getAction()
-    {
-        return $this->action;
-    }
-
-    /**
-     *
-     * @return integer
-     */
-    public function getActionPriority()
-    {
-        return $this->actionPriority;
     }
 
     /**
@@ -367,15 +315,16 @@ class Entry implements ArrayAccess
      * Factory method
      *
      * @param mixed $object
-     * @param array $ids
-     * @param int   $state
+     * @param ContentInfo $contentInfo
+     * @param SchemaInterface $schema
+     * @param int $state
+     * @param null $language
      * @param array $data
-     *
      * @return Entry
      */
-    public static function factory($object, array $ids = array(), $state = RegistryState::UNKNOWN, array $data = array())
+    public static function factory($object, ContentInfo $contentInfo = null, SchemaInterface $schema = null, $state = RegistryState::UNKNOWN, $language = null, array $data = array())
     {
-        return new self($object, $ids, $state, $data);
+        return new self($object, $contentInfo, $schema, $state, $language, $data);
     }
 
     /**
@@ -457,26 +406,38 @@ class Entry implements ArrayAccess
      */
     public function __toString()
     {
-        return get_class($this) . '@' . spl_object_hash($this);
+        return get_class($this->object) . '@' . spl_object_hash($this->object);
     }
 
     /**
-     * @return array
+     * @return ContentInfo|null
      */
-    public function getIdentifiers()
+    public function getContentInfo()
     {
-        return $this->identifiers;
+        return $this->contentInfo;
     }
 
     /**
-     * @param array $identifiers
-     *
-     * @return Entry
+     * @param ContentInfo|null $contentInfo
      */
-    public function setIdentifiers(array $identifiers)
+    public function setContentInfo($contentInfo)
     {
-        $this->identifiers = $identifiers;
+        $this->contentInfo = $contentInfo;
+    }
 
-        return $this;
+    /**
+     * @return SchemaInterface|null
+     */
+    public function getSchema()
+    {
+        return $this->schema;
+    }
+
+    /**
+     * @param SchemaInterface|null $schema
+     */
+    public function setSchema($schema)
+    {
+        $this->schema = $schema;
     }
 }

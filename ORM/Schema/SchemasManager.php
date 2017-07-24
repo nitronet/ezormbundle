@@ -55,14 +55,19 @@ class SchemasManager implements ContainerAwareInterface
 
     /**
      * @param integer $id
-     *
      * @return SchemaInterface
+     * @throws ORMException
      */
     public function loadSchemaByContentTypeId($id)
     {
         if (!array_key_exists($id, $this->schemasById)) {
             $query          = Query::factory()->select()->from(eZORMBundle::CONTENTTYPE_TABLE_ALIAS)->text($id);
             $results        = $this->connection->execute($query);
+
+            if (!isset($results[$id])) {
+                throw ORMException::schemaByContentTypeIdNotFoundExceptionFactory($id);
+            }
+
             $contentType    = $results[$id];
             $schema         = $this->loadSchema($contentType);
 
@@ -70,6 +75,23 @@ class SchemasManager implements ContainerAwareInterface
         }
 
         return $this->schemasById[$id];
+    }
+
+    /**
+     * @param $className
+     * @return Schema
+     *
+     * @throws ORMException
+     */
+    public function loadSchemaByEntityClassName($className)
+    {
+        foreach ($this->schemasById as $schema) {
+            if ($schema->getEntityClass() === $className) {
+                return $schema;
+            }
+        }
+
+        throw ORMException::schemaByEntityNotFound($className);
     }
 
     /**
