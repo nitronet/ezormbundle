@@ -3,9 +3,6 @@ namespace Nitronet\eZORMBundle\Tests\ORM;
 
 
 use Nitronet\eZORMBundle\ORM\Connection;
-use Nitronet\eZORMBundle\ORM\Manager\EntityManager;
-use Nitronet\eZORMBundle\ORM\Manager\SchemasManager;
-use Nitronet\eZORMBundle\ORM\Manager\TablesManager;
 use Nitronet\eZORMBundle\Tests\Utils\ContainerFactory;
 use Nitronet\eZORMBundle\Tests\Utils\MockFactory;
 

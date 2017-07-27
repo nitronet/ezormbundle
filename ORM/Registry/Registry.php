@@ -15,6 +15,8 @@ use Nitronet\eZORMBundle\ORM\Schema\SchemasManager;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
 use \SplObjectStorage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class Registry implements \Countable, \IteratorAggregate
 {
@@ -24,6 +26,11 @@ class Registry implements \Countable, \IteratorAggregate
      * @var SplObjectStorage
      */
     protected $store;
+
+    /**
+     * @var PropertyAccessor
+     */
+    protected static $accessor;
 
     /**
      * Registry Constructor
@@ -63,6 +70,20 @@ class Registry implements \Countable, \IteratorAggregate
         return false;
     }
 
+    /**
+     * @return PropertyAccessor
+     */
+    public static function getAccessor()
+    {
+        if (!isset(static::$accessor)) {
+            static::$accessor = PropertyAccess::createPropertyAccessorBuilder()
+                ->enableMagicCall()
+                ->getPropertyAccessor()
+            ;
+        }
+
+        return static::$accessor;
+    }
 
     /**
      * Stores an object into registry

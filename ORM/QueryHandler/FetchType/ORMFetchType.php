@@ -15,11 +15,10 @@ use eZ\Publish\API\Repository\Values\Content\Search\SearchResult;
 use Nitronet\eZORMBundle\ORM\Connection;
 use Nitronet\eZORMBundle\ORM\Exception\ORMException;
 use Nitronet\eZORMBundle\ORM\QueryHandler\FetchTypeInterface;
+use Nitronet\eZORMBundle\ORM\Registry\Registry;
 use Nitronet\eZORMBundle\ORM\Schema\Field;
 use Nitronet\eZORMBundle\ORM\Schema\MetaFieldInterface;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class ORMFetchType implements FetchTypeInterface
 {
@@ -27,11 +26,6 @@ class ORMFetchType implements FetchTypeInterface
      * @var Connection
      */
     protected $connection;
-
-    /**
-     * @var PropertyAccessor
-     */
-    protected static $accessor;
 
     /**
      * ORMFetchType constructor.
@@ -72,24 +66,12 @@ class ORMFetchType implements FetchTypeInterface
 
             $entity         = $em->entityFactory($content->contentInfo, $schema, $matchedLang);
             $results[]      = $this->populate($entity, $content, $schema, $language, $matchedLang);
+
+            // mark entity as "fresh" from this point
+            $em->getRegistry()->getEntry($entity)->fresh();
         }
 
         return $results;
-    }
-
-    /**
-     * @return PropertyAccessor
-     */
-    protected static function getAccessor()
-    {
-        if (!isset(static::$accessor)) {
-            static::$accessor = PropertyAccess::createPropertyAccessorBuilder()
-                ->enableMagicCall()
-                ->getPropertyAccessor()
-            ;
-        }
-
-        return static::$accessor;
     }
 
     /**
@@ -104,8 +86,7 @@ class ORMFetchType implements FetchTypeInterface
     protected function populate($entity, Content $content, SchemaInterface $schema,
         $lang, $defaultLang
     ) {
-        /** @var PropertyAccessor $pa */
-        $pa = self::getAccessor();
+        $pa = Registry::getAccessor();
 
         $fields = $schema->getFields();
 

@@ -93,6 +93,14 @@ class EntityManager
     }
 
     /**
+     * @return Registry
+     */
+    public function getRegistry()
+    {
+        return $this->registry;
+    }
+
+    /**
      * @param object $entity
      * @param Location|Location[]|int|int[]|null $location
      * @param null|string $language

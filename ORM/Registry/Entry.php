@@ -43,16 +43,6 @@ class Entry extends EventDispatcher implements ArrayAccess
     protected $initialValues = array();
 
     /**
-     * @var integer
-     */
-    protected $storeTs = null;
-
-    /**
-     * @var integer
-     */
-    protected $stateTs = null;
-
-    /**
      * The stored object
      *
      * @var mixed
@@ -85,9 +75,8 @@ class Entry extends EventDispatcher implements ArrayAccess
      * @param ContentInfo $contentInfo
      * @param SchemaInterface|null $schema
      * @param int $state
+     * @param null $language
      * @param array $data
-     *
-     * @internal param array $ids
      */
     public function __construct($object, ContentInfo $contentInfo = null, SchemaInterface $schema = null, $state = RegistryState::UNKNOWN, $language = null, array $data = array())
     {
@@ -100,9 +89,7 @@ class Entry extends EventDispatcher implements ArrayAccess
         $this->contentInfo  = $contentInfo;
         $this->schema       = $schema;
         $this->language     = $language;
-        $this->storeTs      = time();
         $this->state        = $state;
-        $this->stateTs      = time();
         $this->className    = get_class($object);
         $this->data         = $data;
 
@@ -134,7 +121,6 @@ class Entry extends EventDispatcher implements ArrayAccess
     public function setState($state)
     {
         $this->state    = $state;
-        $this->stateTs  = time();
 
         return $this;
     }
@@ -150,45 +136,82 @@ class Entry extends EventDispatcher implements ArrayAccess
     }
 
     /**
-     * Returns the date of the current state
-     *
-     * @return \DateTime
-     */
-    public function getStateDate()
-    {
-        $date = new \DateTime();
-        $date->setTimestamp($this->stateTs);
-
-        return $date;
-    }
-
-    /**
-     * Returns the date of the storage
-     *
-     * @return \DateTime
-     */
-    public function getStoreDate()
-    {
-        $date = new \DateTime();
-        $date->setTimestamp($this->storeTs);
-
-        return $date;
-    }
-
-    /**
      * Defines initial values of the object and mark it as "fresh"
      *
      * @return Entry
      */
     public function fresh()
     {
-          // TODO Change this
-//        $accessor               = new Accessor($this->object);
-//        $this->initialValues    = $accessor->toArray(array($accessor, 'everythingAsArrayModifier'));
-
+        $this->initialValues = $this->toFieldsArray();
         $this->setState(RegistryState::FRESH);
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function toFieldsArray()
+    {
+        if ($this->schema instanceof SchemaInterface) {
+            return $this->objectToArrayFromSchema();
+        }
+
+        return $this->objectToArrayFromReflection();
+    }
+
+    /**
+     *
+     * @return array
+     */
+    private function objectToArrayFromSchema()
+    {
+        $final = array();
+
+        $fields = $this->schema->getFields();
+        foreach ($fields as $fieldName => $field) {
+            $final[$fieldName] = $this->getValueAt($fieldName);
+        }
+
+        return $final;
+    }
+
+    /**
+     *
+     * @return array
+     */
+    private function objectToArrayFromReflection()
+    {
+        $final = array();
+
+        $reflector = new \ReflectionClass($this->object);
+        $props = $reflector->getProperties();
+
+        foreach ($props as $property) {
+            $final[$property->getName()] = $this->getValueAt($property->getName());
+        }
+
+        return $final;
+    }
+
+    /**
+     * @param string $property
+     *
+     * @return mixed|string
+     */
+    private function getValueAt($property)
+    {
+        if ($this->object instanceof \stdClass) {
+            $value = $this->object->{$property};
+        } else {
+            $value = Registry::getAccessor()->getValue($this->object, $fieldName);
+        }
+
+        if (is_object($value)) {
+            $value = sprintf('%s#%s', get_class($value), spl_object_hash($value));
+        }
+
+        return $value;
     }
 
     /**
@@ -231,19 +254,12 @@ class Entry extends EventDispatcher implements ArrayAccess
      */
     public function hasChanged()
     {
-        if ($this->isState(RegistryState::CHANGED)) {
-            return true;
-        }
-
         if (!$this->isState(RegistryState::FRESH)) {
-            return false;
+            return $this->isState(RegistryState::CHANGED);
         }
 
-//        $accessor   = new Accessor($this->object);
-//        $values     = $accessor->toArray(array($accessor, 'everythingAsArrayModifier'));
-//        $diff       = array_diff_assoc($this->initialValues, $values);
-        // TODO Change this
-        $diff = array();
+        $values     = $this->toFieldsArray();
+        $diff       = array_diff_assoc($this->initialValues, $values);
 
         if (!count($diff)) {
             return false;
@@ -261,11 +277,7 @@ class Entry extends EventDispatcher implements ArrayAccess
      */
     public function getChangedValues()
     {
-//        $accessor   = new Accessor($this->object);
-//        $values     = $accessor->toArray(array($accessor, 'everythingAsArrayModifier'));
-        // TODO Change this
-        $values = array();
-
+        $values     = $this->toFieldsArray();
         $diff       = array();
         foreach ($values as $key => $val) {
             if(!isset($this->initialValues[$key]) || $this->initialValues[$key] !== $val) {
@@ -290,11 +302,11 @@ class Entry extends EventDispatcher implements ArrayAccess
      */
     public function data($key, $default = false)
     {
-        if (!array_key_exists($key, $this->data) && $default != false) {
-            $this->data[$key] = $default;
+        if (!array_key_exists($key, $this->data)) {
+            return $default;
         }
 
-        return array_key_exists($key, $this->data) ? $this->data[$key] : $default;
+        return $this->data[$key];
     }
 
     /**
