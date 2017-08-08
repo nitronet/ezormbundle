@@ -201,6 +201,32 @@ class ContentQueryHandler extends AbstractQueryHandler implements QueryHandlerIn
     }
 
     /**
+     * @param Query $query
+     * @param null|string $language
+     *
+     * @return int
+     * @throws QueryException
+     */
+    public function handleDelete(Query $query, $language = null)
+    {
+        $contentService = $this->getConnection()->getRepository()->getContentService();
+
+        $table = $query->getTable();
+        if ($table instanceof ContentInfo) {
+            $contentInfo = $table;
+        } elseif ($table instanceof Content) {
+            $contentInfo = $table->contentInfo;
+        } else {
+            // TODO: select -> delete ?
+            throw QueryException::invalidUpdateTargetExceptionFactory($table);
+        }
+
+        $contentService->deleteContent($contentInfo);
+
+        return 1;
+    }
+
+    /**
      * {@see AbstractQueryHandler::supports()}
      *
      * @param string $fetchType
