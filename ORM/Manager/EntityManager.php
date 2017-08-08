@@ -17,6 +17,8 @@ use Nitronet\eZORMBundle\ORM\Registry\Registry;
 use Nitronet\eZORMBundle\ORM\Registry\RegistryState;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
 use Nitronet\eZORMBundle\ORM\WorkerInterface;
+use Nitronet\eZORMBundle\ORM\Workers\RemoveEntityWorker;
+use Nitronet\eZORMBundle\ORM\Workers\SaveEntityWorker;
 
 class EntityManager
 {
@@ -105,18 +107,27 @@ class EntityManager
      * @param Location|Location[]|int|int[]|null $location
      * @param null|string $language
      * @param bool $draft
-     * @param bool $visible
+     * @param bool $hidden
+     *
+     * @return EntityManager
      */
-    public function persist($entity, $location, $language = null, $draft = false, $visible = true)
+    public function publish($entity, $location = null, $language = null, $draft = false, $hidden = false)
     {
+        $this->workersQueue->push(new SaveEntityWorker($entity, $location, $language, $draft, $hidden));
+
+        return $this;
     }
 
     /**
      * @param object $entity
-     * @param Location|Location[]|int|int[]|null $location
+     *
+     * @return EntityManager
      */
-    public function remove($entity, $location = null)
+    public function remove($entity)
     {
+        $this->workersQueue->push(new RemoveEntityWorker($entity));
+
+        return $this;
     }
 
     /**
@@ -130,5 +141,8 @@ class EntityManager
                 $worker->execute($this->connection);
             }
         }
+
+        unset($this->workersQueue);
+        $this->workersQueue = new \SplQueue();
     }
 }

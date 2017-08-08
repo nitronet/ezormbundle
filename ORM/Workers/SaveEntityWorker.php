@@ -15,11 +15,31 @@ use Nitronet\eZORMBundle\ORM\WorkerInterface;
 
 class SaveEntityWorker implements WorkerInterface
 {
+    protected $entity;
+
+    protected $location;
+
+    protected $language;
+
+    protected $draft;
+
+    protected $hidden;
+
+    public function __construct($entity, $location = null, $language = null, $draft = false, $hidden = false)
+    {
+        $this->entity = $entity;
+        $this->location = $location;
+        $this->language = $language;
+        $this->draft = $draft;
+        $this->hidden = $hidden;
+    }
+
     /**
      * @param Connection $connection
      * @return mixed
      */
     public function execute(Connection $connection)
     {
+
     }
 }

@@ -15,6 +15,17 @@ use Nitronet\eZORMBundle\ORM\WorkerInterface;
 
 class RemoveEntityWorker implements WorkerInterface
 {
+    protected $entity;
+
+    /**
+     * RemoveEntityWorker constructor.
+     * @param object $entity
+     */
+    public function __construct($entity)
+    {
+        $this->entity = $entity;
+    }
+
     /**
      * @param Connection $connection
      * @return mixed
