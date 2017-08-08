@@ -204,7 +204,7 @@ class Entry extends EventDispatcher implements ArrayAccess
         if ($this->object instanceof \stdClass) {
             $value = $this->object->{$property};
         } else {
-            $value = Registry::getAccessor()->getValue($this->object, $fieldName);
+            $value = Registry::getAccessor()->getValue($this->object, $property);
         }
 
         if (is_object($value)) {

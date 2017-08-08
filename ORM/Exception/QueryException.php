@@ -119,4 +119,51 @@ class QueryException extends Exception
             implode(' or ', [eZContentQuery::class, eZLocationQuery::class])
         ));
     }
+
+    /**
+     * This exception is thrown when the Query doesn't provide informations to load
+     * an eZ Content-Type object
+     *
+     * @param $table
+     *
+     * @return QueryException
+     */
+    public static function invalidQueryTableExceptionFactory($table)
+    {
+        return new self(sprintf(
+            'Invalid Table identifier: "%s"',
+            $table
+        ));
+    }
+
+    /**
+     * This exception is thrown when the Query doesn't provide any Location
+     *
+     * @param string $queryType
+     *
+     * @return QueryException
+     */
+    public static function queryNeedsLocationsExceptionFactory($queryType)
+    {
+        return new self(sprintf(
+            'Query type "%s" require at least one location',
+            $queryType
+        ));
+    }
+
+
+    /**
+     * This exception is thrown when the Query doesn't provide any Location
+     *
+     * @param mixed $locationId
+     *
+     * @return QueryException
+     */
+    public static function invalidLocationIdentifierExceptionFactory($locationId)
+    {
+        return new self(sprintf(
+            'Invalid location identifier: "%s"',
+            (is_object($locationId) ? $locationId : (string)$locationId)
+        ));
+    }
 }

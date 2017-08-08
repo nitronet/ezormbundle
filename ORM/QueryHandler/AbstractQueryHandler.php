@@ -11,8 +11,10 @@ namespace Nitronet\eZORMBundle\ORM\QueryHandler;
 
 
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion\ContentTypeIdentifier;
+use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use Nitronet\eZORMBundle\ORM\Connection;
 use Nitronet\eZORMBundle\ORM\Exception\QueryException as QE;
+use Nitronet\eZORMBundle\ORM\Exception\QueryException;
 use Nitronet\eZORMBundle\ORM\Exception\QueryHandlerException;
 use Nitronet\eZORMBundle\ORM\Query;
 
@@ -215,5 +217,32 @@ abstract class AbstractQueryHandler
         }
 
         return new ContentTypeIdentifier($final);
+    }
+
+    /**
+     * @param Query $query
+     *
+     * @return ContentType
+     * @throws QueryException when invalid table provided
+     */
+    protected function fromQueryToContentType(Query $query)
+    {
+        $table = $query->getTable();
+        if ($table instanceof ContentType) {
+            return $table;
+        }
+
+        if (empty($table)) {
+            throw QE::invalidQueryTableExceptionFactory($table);
+        }
+
+        $contentTypeService = $this->connection->getRepository()->getContentTypeService();
+        if (is_int($table) || is_numeric($table)) {
+            return $contentTypeService->loadContentType($table);
+        } elseif (is_string($table)) {
+            return $contentTypeService->loadContentTypeByIdentifier($table);
+        }
+
+        throw QE::invalidQueryTableExceptionFactory($table);
     }
 }

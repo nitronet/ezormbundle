@@ -9,6 +9,7 @@
  */
 namespace Nitronet\eZORMBundle\ORM;
 
+use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LogicalAnd;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LogicalOr;
 use eZ\Publish\API\Repository\Values\Content\Query\CriterionInterface;
@@ -82,6 +83,36 @@ class Query
      * @var null|CriterionInterface
      */
     protected $where;
+
+    /**
+     * Query values (insert)
+     * @var array
+     */
+    protected $values = array();
+
+    /**
+     * Query insert location(s) (location(s), remoteId(s), Id(s))
+     * @var Location|Location[]|string|string[]|int|int[]
+     */
+    protected $locations;
+
+    /**
+     * Content remoteId (insert)
+     * @var string|null
+     */
+    protected $remoteId = null;
+
+    /**
+     * Content visibility (INSERT/UPDATE)
+     * @var bool
+     */
+    protected $hidden = false;
+
+    /**
+     * Content draft or published? (INSERT/UPDATE)
+     * @var bool
+     */
+    protected $draft = false;
 
     /**
      * Performs a SELECT-like Query
@@ -273,6 +304,19 @@ class Query
         }
     }
 
+
+    /**
+     * @param string|null $remoteId
+     *
+     * @return Query
+     */
+    public function remoteId($remoteId = null)
+    {
+        $this->remoteId = $remoteId;
+
+        return $this;
+    }
+
     /**
      * Defines the Query type (and checks if its not already defined)
      *
@@ -394,5 +438,110 @@ class Query
     public static function factory()
     {
         return new self();
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getRemoteId()
+    {
+        return $this->remoteId;
+    }
+
+    /**
+     * @return array
+     */
+    public function getValues()
+    {
+        return $this->values;
+    }
+
+    /**
+     * Defines values for INSERT/UPDATE queries
+     *
+     * @param array $values
+     *
+     * @return Query
+     */
+    public function values(array $values)
+    {
+        $this->values = array_merge($this->values, $values);
+
+        return $this;
+    }
+
+    /**
+     * Set one Value for INSERT/UPDATE queries
+     *
+     * @param string $key
+     * @param mixed $value
+     *
+     * @return Query
+     */
+    public function set($key, $value)
+    {
+        $this->values[$key] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @return Location|Location[]|int|\int[]|string|\string[]
+     */
+    public function getLocations()
+    {
+        return $this->locations;
+    }
+
+    /**
+     * @param Location|Location[]|int|\int[]|string|\string[] $location
+     *
+     * @return Query
+     */
+    public function into($location)
+    {
+        $this->locations = $location;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $bool
+     *
+     * @return Query
+     */
+    public function hidden($bool)
+    {
+        $this->hidden = $bool;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHidden()
+    {
+        return $this->hidden;
+    }
+
+    /**
+     * @param bool $bool
+     *
+     * @return Query
+     */
+    public function draft($bool)
+    {
+        $this->draft = $bool;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDraft()
+    {
+        return $this->draft;
     }
 }

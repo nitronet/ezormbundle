@@ -10,7 +10,10 @@
 namespace Nitronet\eZORMBundle\ORM\QueryHandler;
 
 
+use eZ\Publish\API\Repository\Values\Content\Content;
+use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchResult;
+use Nitronet\eZORMBundle\ORM\Exception\QueryException;
 use Nitronet\eZORMBundle\ORM\Query;
 use Nitronet\eZORMBundle\ORM\QueryHandlerInterface;
 use eZ\Publish\API\Repository\Values\Content\Query as eZContentQuery;
@@ -44,9 +47,15 @@ class ContentQueryHandler extends AbstractQueryHandler implements QueryHandlerIn
             }
 
             return $this->fetchTypeTransformerFactory($fetchType)->transform($searchResult, $language);
+        } elseif ($query->isType(Query::QUERY_TYPE_INSERT)) {
+            return $this->handleInsert($query, $language);
+        } elseif ($query->isType(Query::QUERY_TYPE_UPDATE)) {
+            return $this->handleUpdate($query, $language);
+        } elseif ($query->isType(Query::QUERY_TYPE_DELETE)) {
+            return $this->handleDelete($query, $language);
         }
 
-        throw new \Exception('This query type is not implemented yet');
+        throw new \Exception('Query type is not implemented yet');
     }
 
     /**
@@ -87,6 +96,68 @@ class ContentQueryHandler extends AbstractQueryHandler implements QueryHandlerIn
             ->getRepository()
             ->getSearchService()
             ->findContent($ezQuery, $language);
+    }
+
+    /**
+     * @param Query $query
+     * @param null|string $language
+     *
+     * @return bool|Content
+     * @throws QueryException
+     */
+    public function handleInsert(Query $query, $language = null)
+    {
+        $contentService = $this->getConnection()->getRepository()->getContentService();
+        $contentType = $this->fromQueryToContentType($query);
+        $struct = $contentService->newContentCreateStruct($contentType, $language);
+        if (!empty($query->getRemoteId())) {
+            $struct->remoteId = $query->getRemoteId();
+        }
+
+        if (null !== $language) {
+            $struct->mainLanguageCode = $language;
+        }
+
+        $values = $query->getValues();
+        foreach ($values as $attribute => $value) {
+            $struct->setField($attribute, $value);
+        }
+
+        $locationService = $this->getConnection()->getRepository()->getLocationService();
+        $locations = $query->getLocations();
+        $locationsStructs = array();
+
+        if (!count($locations)) {
+            throw QueryException::queryNeedsLocationsExceptionFactory('INSERT');
+        }
+
+        foreach ($locations as $id => $location) {
+            if (is_int($location) || is_numeric($location)) {
+                $locStruct = $locationService->newLocationCreateStruct($location);
+            } elseif (is_string($location)) {
+                $locStruct = $locationService->newLocationCreateStruct(
+                    $locationService->loadLocationByRemoteId($location)
+                );
+            } elseif ($location instanceof Location) {
+                $locStruct = $locationService->newLocationCreateStruct($location->id);
+            } else {
+                throw QueryException::invalidLocationIdentifierExceptionFactory($location);
+            }
+
+            $locStruct->hidden = $query->isHidden();
+            if (is_string($id) && !empty($id)) {
+                $locStruct->remoteId = $id;
+            }
+
+            $locationsStructs[] = $locStruct;
+        }
+
+        $draft = $contentService->createContent($struct, $locationsStructs);
+        if ($query->isDraft()) {
+            return $draft;
+        }
+
+        return $contentService->publishVersion($draft->versionInfo);
     }
 
     /**
