@@ -1,6 +1,8 @@
 <?php
 namespace Nitronet\eZORMBundle\ORM\Exception;
 
+use eZ\Publish\API\Repository\Values\Content\Content;
+use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use Nitronet\eZORMBundle\Exception;
 use Nitronet\eZORMBundle\ORM\Query;
 use Nitronet\eZORMBundle\ORM\TableInterface;
@@ -164,6 +166,23 @@ class QueryException extends Exception
         return new self(sprintf(
             'Invalid location identifier: "%s"',
             (is_object($locationId) ? $locationId : (string)$locationId)
+        ));
+    }
+
+    /**
+     * This exception is thrown when the Query doesn't provide any Location
+     *
+     * @param mixed $thing
+     *
+     * @return QueryException
+     */
+    public static function invalidUpdateTargetExceptionFactory($thing)
+    {
+        return new self(sprintf(
+            'Update target should be either an instance of "%s" or "%s". "%s" given.',
+            Content::class,
+            ContentInfo::class,
+            gettype($thing)
         ));
     }
 }

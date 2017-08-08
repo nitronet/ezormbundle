@@ -11,7 +11,6 @@ namespace Nitronet\eZORMBundle\ORM\Registry;
 
 
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
-use Nitronet\eZORMBundle\ORM\Schema\SchemasManager;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
 use \SplObjectStorage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

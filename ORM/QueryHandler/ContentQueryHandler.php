@@ -11,6 +11,7 @@ namespace Nitronet\eZORMBundle\ORM\QueryHandler;
 
 
 use eZ\Publish\API\Repository\Values\Content\Content;
+use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchResult;
 use Nitronet\eZORMBundle\ORM\Exception\QueryException;
@@ -153,6 +154,45 @@ class ContentQueryHandler extends AbstractQueryHandler implements QueryHandlerIn
         }
 
         $draft = $contentService->createContent($struct, $locationsStructs);
+        if ($query->isDraft()) {
+            return $draft;
+        }
+
+        return $contentService->publishVersion($draft->versionInfo);
+    }
+
+
+    /**
+     * @param Query $query
+     * @param null|string $language
+     *
+     * @return bool|Content
+     * @throws QueryException
+     */
+    public function handleUpdate(Query $query, $language = null)
+    {
+        $contentService = $this->getConnection()->getRepository()->getContentService();
+
+        $table = $query->getTable();
+        if ($table instanceof ContentInfo) {
+            $contentInfo = $table;
+        } elseif ($table instanceof Content) {
+            $contentInfo = $table->contentInfo;
+        } else {
+            // TODO: select -> update ?
+            throw QueryException::invalidUpdateTargetExceptionFactory($table);
+        }
+
+        $struct = $contentService->newContentUpdateStruct();
+        $struct->initialLanguageCode = $language;
+        $values = $query->getValues();
+        foreach ($values as $attribute => $value) {
+            $struct->setField($attribute, $value);
+        }
+
+        $draft = $contentService->createContentDraft($contentInfo);
+        $draft = $contentService->updateContent($draft->versionInfo, $struct);
+
         if ($query->isDraft()) {
             return $draft;
         }
