@@ -71,9 +71,9 @@ class EntityManager
         }
 
         if ($schema instanceof SchemaInterface) {
-            $entityClass = (!empty($schema->getEntityClass()) ?  $schema->getEntityClass() : '\stdClass');
+            $entityClass = (!empty($schema->getEntityClass()) ?  $schema->getEntityClass() : \stdClass::class);
         } else {
-            $entityClass = '\stdClass';
+            $entityClass = \stdClass::class;
         }
 
         $entry = false;

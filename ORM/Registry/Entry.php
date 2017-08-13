@@ -184,11 +184,18 @@ class Entry extends EventDispatcher implements ArrayAccess
     {
         $final = array();
 
-        $reflector = new \ReflectionClass($this->object);
-        $props = $reflector->getProperties();
+        if (get_class($this->object) === \stdClass::class) {
+            $props =  get_object_vars($this->object);
+            foreach ($props as $property => $v) {
+                $final[$property] = $this->getValueAt($property);
+            }
+        } else {
+            $reflector = new \ReflectionClass($this->object);
+            $props = $reflector->getProperties();
 
-        foreach ($props as $property) {
-            $final[$property->getName()] = $this->getValueAt($property->getName());
+            foreach ($props as $property) {
+                $final[$property->getName()] = $this->getValueAt($property->getName());
+            }
         }
 
         return $final;
@@ -248,7 +255,7 @@ class Entry extends EventDispatcher implements ArrayAccess
     }
 
     /**
-     * Tells if the objects values has been changed
+     * Tells if the objects values has changed
      *
      * @return boolean
      */
