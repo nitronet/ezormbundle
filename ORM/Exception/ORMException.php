@@ -154,4 +154,14 @@ class ORMException extends Exception
     {
         return new self(sprintf('Entity "%s" has an invalid state for worker "%s"', get_class($entity), get_class($worker)));
     }
+
+    /**
+     * @param object $entity
+     *
+     * @return ORMException
+     */
+    public static function schemaMissingExceptionFactory($entity)
+    {
+        return new self(sprintf('Entity "%s" has no Schema available.', get_class($entity)));
+    }
 }

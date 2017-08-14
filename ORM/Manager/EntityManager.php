@@ -120,12 +120,13 @@ class EntityManager
 
     /**
      * @param object $entity
+     * @param string|null $language
      *
      * @return EntityManager
      */
-    public function remove($entity)
+    public function remove($entity, $language =  null)
     {
-        $this->workersQueue->push(new RemoveEntityWorker($entity));
+        $this->workersQueue->push(new RemoveEntityWorker($entity, $language));
 
         return $this;
     }

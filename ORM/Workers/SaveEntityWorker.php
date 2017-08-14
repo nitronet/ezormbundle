@@ -87,8 +87,18 @@ class SaveEntityWorker implements WorkerInterface
             return;
         }
 
-        $state      = $entry->getState();
         $schema     = $entry->getSchema();
+        if (null === $schema) {
+            throw ORMException::schemaMissingExceptionFactory($this->entity);
+        }
+
+        $query      = Query::factory()
+            ->hidden($this->hidden)
+            ->draft($this->draft)
+            ->into($this->location)
+        ;
+
+        $state      = $entry->getState();
         switch($state)
         {
             case RegistryState::FRESH:
@@ -121,15 +131,12 @@ class SaveEntityWorker implements WorkerInterface
                     return;
                 }
 
-                $query = Query::factory()
-                    ->update($entry->getContentInfo())
-                    ->hidden($this->hidden)
-                    ->draft($this->draft)
-                    ->into($this->location)
-                    ->values($values)
-                ;
+                $query->update($entry->getContentInfo())->values($values);
 
-                $connection->execute($query, null, $this->language);
+                $result = $connection->execute($query, null, $this->language);
+                if ($result instanceof Content) {
+                    $entry->setContentInfo($result->contentInfo);
+                }
 
                 break;
 
@@ -155,13 +162,7 @@ class SaveEntityWorker implements WorkerInterface
                         ), $connection);
                 }
 
-                $query = Query::factory()
-                    ->insert($schema->getContentTypeIdentifier())
-                    ->hidden($this->hidden)
-                    ->draft($this->draft)
-                    ->into($this->location)
-                    ->values($values)
-                ;
+                $query = Query::factory()->insert($schema->getContentTypeIdentifier())->values($values);
 
                 $result = $connection->execute($query, null, $this->language);
                 if ($result instanceof Content) {

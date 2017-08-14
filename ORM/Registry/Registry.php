@@ -174,4 +174,15 @@ class Registry implements \Countable, \IteratorAggregate
 
         return $this;
     }
+
+    /**
+     * @param Entry $entry
+     */
+    public function removeEntry(Entry $entry)
+    {
+        if ($this->store->contains($entry)) {
+            $this->store->detach($entry);
+            unset($entry);
+        }
+    }
 }
