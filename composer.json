@@ -15,6 +15,12 @@
         "ezsystems/ezpublish-kernel": "6.8.*"
     },
     "require-dev": {
+        "symfony/monolog-bundle": "~2.4",
+        "white-october/pagerfanta-bundle": "1.0.*",
+        "ezsystems/ez-support-tools": "~0.1.0",
+        "ezsystems/repository-forms": "~1.5.0",
+        "ezsystems/content-on-the-fly-prototype": "~0.1.7",
+
         "phpunit/phpunit": "^4.7.0"
     },
     "autoload": {

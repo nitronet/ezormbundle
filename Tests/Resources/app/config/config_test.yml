@@ -1,0 +1,138 @@
+parameters:
+    database_driver: pdo_mysql
+    database_host: mysql
+    database_port: null
+    database_name: bigapp
+    database_user: bigapp
+    database_password: bigapp
+
+    kernel.debug: true
+    kernel.secret: ThisEzPlatformTokenIsNotSoSecretChangeItEzORM
+    storage_dir: var/test/storage
+    io_root_dir: "%storage_dir%"
+
+    session.attribute_bag.class: Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag
+    fragment.listener.class: Symfony\Component\HttpKernel\EventListener\FragmentListener
+
+doctrine:
+    dbal:
+        connections:
+            default:
+                driver: %database_driver%
+                host: %database_host%
+                port: %database_port%
+                user: %database_user%
+                password: %database_password%
+                dbname: %database_name%
+                charset: UTF8
+
+framework:
+    esi:             ~
+    translator:      { fallback: "en" }
+    secret:          "%kernel.secret%"
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: ~
+    form:
+        csrf_protection:
+            enabled: false
+            # Note: changing this will break legacy extensions that rely on the default name to alter AJAX requests
+            # See https://jira.ez.no/browse/EZP-20783
+            field_name: ezxform_token
+    validation:      { enable_annotations: true }
+    # Place "eztpl" engine first intentionnally.
+    # This is to avoid template name parsing with Twig engine, refusing specific characters
+    # which are valid with legacy tpl files.
+    templating:      { engines: ['twig'] } #assets_version: SomeVersionScheme
+    default_locale:  "en"
+    trusted_hosts:   ~
+    trusted_proxies: ~
+    session:
+        # handler_id set to null will use default session handler from php.ini
+        handler_id:  ~
+
+    fragments:       ~
+    http_method_override: true
+
+security:
+    providers:
+        ezpublish:
+            id: ezpublish.security.user_provider
+#!        in_memory:
+#!            memory: ~
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+#        ezpublish_rest:
+#            pattern: ^/api/ezp/v2
+#            stateless: true
+#            ezpublish_http_basic:
+#                realm: eZ Publish REST API
+
+        ezpublish_front:
+            pattern: ^/
+            anonymous: ~
+            ezpublish_rest_session: ~
+            form_login:
+                require_previous_session: false
+            logout: ~
+
+        default:
+            anonymous: ~
+
+ezpublish:
+    # Repositories configuration, setup default repository to support solr if enabled
+    repositories:
+        default:
+            storage: ~
+            search:
+                engine: legacy
+                connection: default
+
+    locale_conversion:
+        eng-GB: en_GB
+        fre-FR: fr_FR
+
+    # Siteaccess configuration, with one siteaccess per default
+    siteaccess:
+        list: [test, test_fr]
+        groups:
+            appnet_sso_group: [test, test_fr]
+        default_siteaccess: test
+        match:
+            Map\URI:
+                fr: test_fr
+
+    # System settings, grouped by siteaccess and/or siteaccess group
+    system:
+        test_group:
+            session:
+                name: SID
+            # Pool to use for cache, needs to be differant per repository (database).
+            cache_pool_name: default
+            # These reflect the current installers, complete installation before you change them. For changing var_dir
+            # it is recommended to install clean, then change setting before you start adding binary content, otherwise you'll
+            # need to manually modify your database data to reflect this to avoid exceptions.
+            var_dir: var/site
+            # System languages. Note that by default, content, content types, and other data are in eng-GB locale,
+            # so removing eng-GB from this list may lead to errors or content not being shown, unless you change
+            # all eng-GB data to other locales first.
+            content:
+                view_cache: true
+                ttl_cache: true
+                default_ttl: 31536000
+                tree_root:
+                    # Root locationId. Default is top locationId
+                    location_id: 54
+                    # Every URL aliases starting with those prefixes will be considered
+                    # being outside of the subtree starting at root_location.
+                    # Default value is an empty array.
+                    # Prefixes are not case sensitive.
+                    excluded_uri_prefixes: [ /ez, /media, /images ]
+        test:
+            languages: [eng-GB]
+        test_fr:
+            languages: [fre-FR, eng-GB]

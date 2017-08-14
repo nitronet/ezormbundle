@@ -12,6 +12,12 @@ parameters:
     ezorm.field_helper.relation.class: Nitronet\eZORMBundle\ORM\Schema\FieldHelper\RelationFieldHelper
 
 services:
+    ezorm.connection:
+        class: Nitronet\eZORMBundle\ORM\Connection
+        arguments:
+            - "@ezpublish.api.repository"
+            - "@service_container"
+
     ezorm.fields_manager:
         class: "%ezorm.fields_manager.class%"
         arguments:

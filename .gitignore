@@ -1,2 +1,5 @@
 /.idea
 /vendor
+/Tests/Resources/app/cache
+/Tests/Resources/app/logs
+

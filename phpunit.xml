@@ -4,16 +4,15 @@
 
     <php>
         <server name="SYMFONY_ENV" value="test" />
-        <server name="SYMFONY_DEBUG" value="false" />
+        <server name="SYMFONY_DEBUG" value="true" />
+        <server name="KERNEL_DIR" value="Tests/Resources/app" />
     </php>
 
     <filter>
         <whitelist>
-            <directory suffix=".php">./</directory>
+            <directory suffix=".php">./Tests</directory>
             <exclude>
                 <directory>./Resources</directory>
-                <directory>./Tests</directory>
-                <directory>./vendor</directory>
             </exclude>
         </whitelist>
     </filter>
