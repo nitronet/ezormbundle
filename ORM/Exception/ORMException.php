@@ -6,6 +6,7 @@ use Nitronet\eZORMBundle\ORM\Schema\Field;
 use Nitronet\eZORMBundle\ORM\Schema\FieldHelperInterface;
 use Nitronet\eZORMBundle\ORM\Schema\MetaFieldInterface;
 use Nitronet\eZORMBundle\ORM\SchemaInterface;
+use Nitronet\eZORMBundle\ORM\WorkerInterface;
 
 class ORMException extends Exception
 {
@@ -131,5 +132,26 @@ class ORMException extends Exception
     public static function schemaByContentTypeIdNotFoundExceptionFactory($id)
     {
         return new self(sprintf('No Schema found for Content-Type identifier ID: "%s"', $id));
+    }
+
+    /**
+     * @param object $entity
+     *
+     * @return ORMException
+     */
+    public static function unregisteredEntityExceptionFactory($entity)
+    {
+        return new self(sprintf('Entity "%s" is not registered', get_class($entity)));
+    }
+
+    /**
+     * @param object $entity
+     * @param WorkerInterface $worker
+     *
+     * @return ORMException
+     */
+    public static function invalidEntityStateExceptionFactory($entity, WorkerInterface $worker)
+    {
+        return new self(sprintf('Entity "%s" has an invalid state for worker "%s"', get_class($entity), get_class($worker)));
     }
 }

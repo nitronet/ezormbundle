@@ -70,4 +70,9 @@ interface SchemaInterface
      * @return null|string
      */
     public function getEntityClass();
+
+    /**
+     * @return string
+     */
+    public function getContentTypeIdentifier();
 }

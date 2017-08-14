@@ -69,6 +69,11 @@ class Entry extends EventDispatcher implements ArrayAccess
     protected $data = array();
 
     /**
+     * @var bool
+     */
+    protected $working = false;
+
+    /**
      * Constructor
      *
      * @param object $object
@@ -490,5 +495,21 @@ class Entry extends EventDispatcher implements ArrayAccess
     public function setClassName($className)
     {
         $this->className = $className;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isWorking()
+    {
+        return $this->working;
+    }
+
+    /**
+     * @param bool $working
+     */
+    public function setWorking($working)
+    {
+        $this->working = $working;
     }
 }
