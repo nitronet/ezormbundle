@@ -75,13 +75,14 @@ class ORMFetchType implements FetchTypeInterface
     }
 
     /**
-     * @param object  $entity
+     * @param object $entity
      * @param Content $content
      * @param SchemaInterface $schema
      * @param string $lang
      * @param string $defaultLang
      *
      * @return object
+     * @throws ORMException
      */
     protected function populate($entity, Content $content, SchemaInterface $schema,
         $lang, $defaultLang
@@ -94,12 +95,21 @@ class ORMFetchType implements FetchTypeInterface
             $langFields = $content->getFieldsByLanguage($lang);
         }
 
+        $availableFields = $content->getFields();
+        $availableFieldsNames = array();
+        foreach ($availableFields as $field) {
+            $availableFieldsNames[] = $field->fieldDefIdentifier;
+        }
+
         foreach ($fields as $name => $field) {
             /** @var Field $field */
+            if (!in_array($field->getIdentifier(), $availableFieldsNames, true)) {
+                throw ORMException::invalidFieldExceptionFactory($field->getIdentifier(), $schema->getContentTypeIdentifier());
+            }
 
-            $baseValue = (isset($langFields) && array_key_exists($name, $langFields) ?
-                $langFields[$name]->value :
-                $content->getFieldValue($name, $defaultLang)
+            $baseValue = (isset($langFields) && array_key_exists($field->getIdentifier(), $langFields) ?
+                $langFields[$field->getIdentifier()]->value :
+                $content->getFieldValue($field->getIdentifier(), $defaultLang)
             );
 
             $value = $field->getFieldHelper()->toEntityValue($baseValue, $this->connection, $field);

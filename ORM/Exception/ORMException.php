@@ -164,4 +164,16 @@ class ORMException extends Exception
     {
         return new self(sprintf('Entity "%s" has no Schema available.', get_class($entity)));
     }
+
+    /**
+     *
+     * @param $fieldName
+     * @param $contentTypeName
+     *
+     * @return ORMException
+     */
+    public static function invalidFieldExceptionFactory($fieldName, $contentTypeName)
+    {
+        return new self(sprintf('Field "%s" does not exists on ContentType "%s".', $fieldName, $contentTypeName));
+    }
 }
